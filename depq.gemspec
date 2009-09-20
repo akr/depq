@@ -1,0 +1,19 @@
+Gem::Specification.new do |s|
+  s.name = 'depq'
+  s.version = '0.1'
+  s.date = '2009-09-20'
+  s.author = 'Tanaka Akira'
+  s.email = 'akr@fsij.org'
+  s.files = %w[README depq.rb]
+  s.test_files = %w[test-depq.rb]
+  s.has_rdoc = true
+  s.homepage = 'http://www.a-k-r.org/depq/'
+  s.require_path = '.'
+  s.summary = 'Stable Double-Ended Priority Queue.'
+  s.description = <<'End'
+depq is a Double-Ended Priority Queue library.
+It is a data stucture which can insert elements and delete elements with minimum and maximum priority.
+If there are elements which has same priority, the element inserted first is choosen.
+The priority can be changed after the element is inserted.
+End
+end
