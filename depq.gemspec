@@ -12,8 +12,8 @@ Gem::Specification.new do |s|
   s.summary = 'Stable Double-Ended Priority Queue.'
   s.description = <<'End'
 depq is a Double-Ended Priority Queue library.
-It is a data stucture which can insert elements and delete elements with minimum and maximum priority.
-If there are elements which has same priority, the element inserted first is choosen.
+It is a data structure which can insert elements and delete elements with minimum and maximum priority.
+If there are elements which has same priority, the element inserted first is chosen.
 The priority can be changed after the element is inserted.
 End
 end
