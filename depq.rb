@@ -1,4 +1,4 @@
-# PDeque - Feature Rich Double-Ended Priority Queue.
+# Depq - Feature Rich Double-Ended Priority Queue.
 #
 # = Features
 #
@@ -13,12 +13,12 @@
 #
 # == Simple Insertion/Deletion
 #
-# You can insert values into a PDeque object.
+# You can insert values into a Depq object.
 # You can deletes the values from the object from ascending/descending order.
 # delete_min deletes the minimum value.
 # It is used for ascending order.
 #
-#   pd = PDeque.new
+#   pd = Depq.new
 #   pd.insert "durian"
 #   pd.insert "banana"
 #   p pd.delete_min     #=> "banana"
@@ -40,7 +40,7 @@
 # The order is defined by the priorities corresnponds to the values and
 # comparison operator specified for the queue.
 #
-#   pd = PDeque.new(:casecmp)   # use casecmp instead of <=>.
+#   pd = Depq.new(:casecmp)   # use casecmp instead of <=>.
 #   pd.inesrt 1, "Foo"          # specify the priority for 1 as "Foo"
 #   pd.insert 2, "bar"
 #   pd.insert 3, "Baz"
@@ -52,10 +52,10 @@
 # If there are multiple values with same priority, subpriority is used to compare them.
 # subpriority is an integer which can be specified by 3rd argument of insert.
 # If it is not specified, total number of inserted elements is used.
-# So PDeque is "stable" with delete_min.
+# So Depq is "stable" with delete_min.
 # The element inserted first is minimum and deleted first.
 #
-#   pd = PDeque.new
+#   pd = Depq.new
 #   pd.insert "a", 1    # "a", "c" and "e" has same priority: 1
 #   pd.insert "b", 0    # "b", "d" and "f" has same priority: 0
 #   pd.insert "c", 1
@@ -75,21 +75,21 @@
 # == Update Element
 #
 # An inserted element can be modified and/or deleted.
-# This is done using PDeque::Locator object.
+# This is done using Depq::Locator object.
 # It is returned by insert, find_min_locator, etc.
 #
-#   pd = PDeque.new
+#   pd = Depq.new
 #   d = pd.insert "durian", 1
 #   m = pd.insert "mangosteen", 2
 #   c = pd.insert "cherry", 3
-#   p m                         #=> #<PDeque::Locator: "mangosteen":2>
+#   p m                         #=> #<Depq::Locator: "mangosteen":2>
 #   p m.value                   #=> "mangosteen"
 #   p m.priority                #=> 2
 #   p pd.find_min               #=> "durian"
-#   p pd.find_min_locator       #=> #<PDeque::Locator: "durian":1>
+#   p pd.find_min_locator       #=> #<Depq::Locator: "durian":1>
 #   m.update("mangosteen", 0)
 #   p pd.find_min               #=> "mangosteen"
-#   p pd.find_min_locator       #=> #<PDeque::Locator: "mangosteen":0>
+#   p pd.find_min_locator       #=> #<Depq::Locator: "mangosteen":0>
 #   pd.delete_element d
 #   p pd.delete_min             #=> "mangosteen"
 #   p pd.delete_min             #=> "cherry"
@@ -105,7 +105,7 @@
 #        (h[v1] ||= []) << [v2, w]
 #      }
 #      h.default = []
-#      q = PDeque.new
+#      q = Depq.new
 #      visited = {start => q.insert([start], 0)}
 #      until q.empty?
 #        path, w1 = q.delete_min_priority
@@ -141,7 +141,7 @@
 #
 # = Internal Heap Algorithm and Performance Tips
 #
-# PDeque uses min-heap or max-heap internally.
+# Depq uses min-heap or max-heap internally.
 # When delete_min is used, min-heap is constructed and max-heap is destructed.
 # When delete_max is used, max-heap is constructed and min-heap is destructed.
 # So mixing delete_min and delete_max causes bad performance.
@@ -149,13 +149,13 @@
 # min-max-heap will be used when delete_min and delete_max is used both.
 # (Because min-max-heap is slower than min-heap/max-heap.)
 #
-class PDeque
+class Depq
   include Enumerable
 
   Locator = Struct.new(:value, :pdeque_or_subpriority, :index_or_priority)
   class Locator
 
-    # if pdeque_or_subpriority is PDeque
+    # if pdeque_or_subpriority is Depq
     #   pdeque_or_subpriority is pdeque
     #   index_or_priority is index
     # else
@@ -193,7 +193,7 @@ class PDeque
 
     include Comparable
 
-    # Create a PDeque::Locator object.
+    # Create a Depq::Locator object.
     def initialize(value, priority=value, subpriority=nil)
       super value, subpriority, priority
     end
@@ -219,7 +219,7 @@ class PDeque
 
     # returns true if the locator is in a queue.
     def in_queue?
-      pdeque_or_subpriority().kind_of? PDeque
+      pdeque_or_subpriority().kind_of? Depq
     end
 
     # returns the queue.
@@ -271,13 +271,13 @@ class PDeque
     # So subpriority is not changed if subpriority is not specified or nil for a locator in a queue.
     # subpriority is set to nil if subpriority is not specified or nil for a locator not in a queue.
     #
-    #   pd = PDeque.new
+    #   pd = Depq.new
     #   loc1 = pd.insert 1, 2, 3
     #   p [loc1.value, loc1.priority, loc1.subpriority] #=> [1, 2, 3]
     #   loc1.update(11, 12)
     #   p [loc1.value, loc1.priority, loc1.subpriority] #=> [11, 12, 3]
     #
-    #   loc2 = PDeque::Locator.new(4, 5, 6)
+    #   loc2 = Depq::Locator.new(4, 5, 6)
     #   p [loc2.value, loc2.priority, loc2.subpriority] #=> [4, 5, 6]
     #   loc2.update(14, 15)
     #   p [loc2.value, loc2.priority, loc2.subpriority] #=> [14, 15, nil]
@@ -306,7 +306,7 @@ class PDeque
     #
     # This method doesn't change the priority and subpriority.
     #
-    #   pd = PDeque.new
+    #   pd = Depq.new
     #   loc = pd.insert 1, 2, 3
     #   p [loc.value, loc.priority, loc.subpriority]    #=> [1, 2, 3]
     #   loc.update_value 10
@@ -320,7 +320,7 @@ class PDeque
     #
     # This method doesn't change the value.
     #
-    #   pd = PDeque.new
+    #   pd = Depq.new
     #   loc = pd.insert 1, 2, 3
     #   p [loc.value, loc.priority, loc.subpriority] #=> [1, 2, 3]
     #   loc.update_priority 10
@@ -350,25 +350,25 @@ class PDeque
 
   end
 
-  # Create a PDeque object.
+  # Create a Depq object.
   #
   # The optional argument, cmp, specify the method to compare priorities.
   # It should be a symbol or a Proc which takes two arguments.
   # If it is omitted, :<=> is used.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert "Foo"
   #   pd.insert "bar"
   #   p pd.delete_min   #=> "Foo"
   #   p pd.delete_min   #=> "bar"
   #
-  #   pd = PDeque.new(:casecmp)
+  #   pd = Depq.new(:casecmp)
   #   pd.insert "Foo"
   #   pd.insert "bar"
   #   p pd.delete_min   #=> "bar"
   #   p pd.delete_min   #=> "Foo"
   #
-  #   pd = PDeque.new(lambda {|a,b| a.casecmp(b) })
+  #   pd = Depq.new(lambda {|a,b| a.casecmp(b) })
   #   pd.insert "Foo"
   #   pd.insert "bar"
   #   p pd.delete_min   #=> "bar"
@@ -481,7 +481,7 @@ class PDeque
         i = k / ARY_SLICE_SIZE
         loc1 = @ary[k]
         priority = @ary[k+1]
-        loc2 = PDeque::Locator.new(loc1.value, priority)
+        loc2 = Depq::Locator.new(loc1.value, priority)
         loc2.send(:internal_inserted, self, i)
         @ary[k] = loc2
       }
@@ -520,7 +520,7 @@ class PDeque
 
   # compare priority1 and priority2.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.compare_priority("a", "b") #=> -1
   #   p pd.compare_priority("a", "a") #=> 0
   #   p pd.compare_priority("b", "a") #=> 1
@@ -535,7 +535,7 @@ class PDeque
 
   # returns true if the queue is empty.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.empty?       #=> true
   #   pd.insert 1
   #   p pd.empty?       #=> false
@@ -548,7 +548,7 @@ class PDeque
 
   # returns the number of elements in the queue.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.size         #=> 0
   #   pd.insert 1
   #   p pd.size         #=> 1
@@ -568,7 +568,7 @@ class PDeque
   #
   # The result is monotonically increased.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p [pd.size, pd.totalcount]        #=> [0, 0]
   #   pd.insert 1
   #   p [pd.size, pd.totalcount]        #=> [1, 1]
@@ -595,7 +595,7 @@ class PDeque
   #
   # Note that totalcount is not changed.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 1
   #   pd.insert 1
   #   p pd.size         #=> 2
@@ -635,8 +635,8 @@ class PDeque
   #
   # The locator should not already be inserted in a queue.
   #
-  #   pd = PDeque.new
-  #   loc = PDeque::Locator.new(1)
+  #   pd = Depq.new
+  #   loc = Depq::Locator.new(1)
   #   pd.insert_locator loc
   #   p pd.delete_min           #=> 1
   #
@@ -655,7 +655,7 @@ class PDeque
   #
   # If subpriority is omitted or nil, totalcount is used for stability.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 3
   #   pd.insert 1
   #   pd.insert 2
@@ -663,7 +663,7 @@ class PDeque
   #   p pd.delete_min   #=> 2
   #   p pd.delete_min   #=> 3
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 3, 10
   #   pd.insert 1, 20
   #   pd.insert 2, 30
@@ -674,7 +674,7 @@ class PDeque
   # This method returns a locator which locates the inserted element.
   # It can be used to update the value and priority, or delete the element.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 3
   #   loc1 = pd.insert 1
   #   loc2 = pd.insert 2
@@ -702,7 +702,7 @@ class PDeque
   #
   # This method returns nil.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert_all [3,1,2]
   #   p pd.delete_min   #=> 1
   #   p pd.delete_min   #=> 2
@@ -721,12 +721,12 @@ class PDeque
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.find_min_locator     #=> nil
   #   pd.insert 3
   #   pd.insert 1
   #   pd.insert 2
-  #   p pd.find_min_locator     #=> #<PDeque::Locator: 1>
+  #   p pd.find_min_locator     #=> #<Depq::Locator: 1>
   #
   def find_min_locator
     return nil if empty?
@@ -739,7 +739,7 @@ class PDeque
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.find_min_priority    #=> nil
   #   pd.insert "durian", 1
   #   pd.insert "banana", 3
@@ -757,7 +757,7 @@ class PDeque
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.find_min     #=> nil
   #   pd.insert 3
   #   pd.insert 1
@@ -775,12 +775,12 @@ class PDeque
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.find_max_locator     #=> nil
   #   pd.insert 3
   #   pd.insert 1
   #   pd.insert 2
-  #   p pd.find_max_locator     #=> #<PDeque::Locator: 3>
+  #   p pd.find_max_locator     #=> #<Depq::Locator: 3>
   #
   def find_max_locator
     return nil if empty?
@@ -793,7 +793,7 @@ class PDeque
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.find_max_priority    #=> nil
   #   pd.insert "durian", 1
   #   pd.insert "banana", 3
@@ -811,7 +811,7 @@ class PDeque
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.find_max     #=> nil
   #   pd.insert 3
   #   pd.insert 1
@@ -827,12 +827,12 @@ class PDeque
   # returns the locators for the minimum and maximum element as a two-element array.
   # If the queue is empty, [nil, nil] is returned.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.find_minmax_locator #=> [nil, nil]
   #   pd.insert 3
   #   pd.insert 1
   #   pd.insert 2
-  #   p pd.find_minmax_locator #=> [#<PDeque::Locator: 1>, #<PDeque::Locator: 3>]
+  #   p pd.find_minmax_locator #=> [#<Depq::Locator: 1>, #<Depq::Locator: 3>]
   #
   def find_minmax_locator
     return [nil, nil] if empty?
@@ -870,7 +870,7 @@ class PDeque
   # returns the minimum and maximum value as a two-element array.
   # If the queue is empty, [nil, nil] is returned.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   p pd.find_minmax  #=> [nil, nil]
   #   pd.insert 3
   #   pd.insert 1
@@ -885,7 +885,7 @@ class PDeque
 
   # delete the element specified by the locator.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 3
   #   loc = pd.insert 2
   #   pd.insert 1
@@ -916,13 +916,13 @@ class PDeque
   # This method returns the locator for the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 2
   #   pd.insert 1
   #   pd.insert 3
-  #   p pd.delete_min_locator   #=> #<PDeque::Locator: 1 (no queue)>
-  #   p pd.delete_min_locator   #=> #<PDeque::Locator: 2 (no queue)>
-  #   p pd.delete_min_locator   #=> #<PDeque::Locator: 3 (no queue)>
+  #   p pd.delete_min_locator   #=> #<Depq::Locator: 1 (no queue)>
+  #   p pd.delete_min_locator   #=> #<Depq::Locator: 2 (no queue)>
+  #   p pd.delete_min_locator   #=> #<Depq::Locator: 3 (no queue)>
   #   p pd.delete_min_locator   #=> nil
   #
   def delete_min_locator
@@ -939,7 +939,7 @@ class PDeque
   # of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert "durian", 1
   #   pd.insert "banana", 3
   #   pd.insert "melon", 2
@@ -959,7 +959,7 @@ class PDeque
   # This method returns the value of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 3
   #   pd.insert 1
   #   pd.insert 2
@@ -981,13 +981,13 @@ class PDeque
   # This method returns the locator for the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 2
   #   pd.insert 1
   #   pd.insert 3
-  #   p pd.delete_max_locator   #=> #<PDeque::Locator: 3 (no queue)>
-  #   p pd.delete_max_locator   #=> #<PDeque::Locator: 2 (no queue)>
-  #   p pd.delete_max_locator   #=> #<PDeque::Locator: 1 (no queue)>
+  #   p pd.delete_max_locator   #=> #<Depq::Locator: 3 (no queue)>
+  #   p pd.delete_max_locator   #=> #<Depq::Locator: 2 (no queue)>
+  #   p pd.delete_max_locator   #=> #<Depq::Locator: 1 (no queue)>
   #   p pd.delete_max_locator   #=> nil
   #
   def delete_max_locator
@@ -1004,7 +1004,7 @@ class PDeque
   # of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert "durian", 1
   #   pd.insert "banana", 3
   #   pd.insert "melon", 2
@@ -1024,7 +1024,7 @@ class PDeque
   # This method returns the value of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 3
   #   pd.insert 1
   #   pd.insert 2
@@ -1045,13 +1045,13 @@ class PDeque
   # This method returns the locator for the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 1
   #   pd.insert 4
   #   pd.insert 3
-  #   p pd.delete_unspecified_locator #=> #<PDeque::Locator: 3 (no queue)>
-  #   p pd.delete_unspecified_locator #=> #<PDeque::Locator: 4 (no queue)>
-  #   p pd.delete_unspecified_locator #=> #<PDeque::Locator: 1 (no queue)>
+  #   p pd.delete_unspecified_locator #=> #<Depq::Locator: 3 (no queue)>
+  #   p pd.delete_unspecified_locator #=> #<Depq::Locator: 4 (no queue)>
+  #   p pd.delete_unspecified_locator #=> #<Depq::Locator: 1 (no queue)>
   #   p pd.delete_unspecified_locator #=> nil
   #
   def delete_unspecified_locator
@@ -1067,7 +1067,7 @@ class PDeque
   # of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert "durian", 1
   #   pd.insert "banana", 3
   #   pd.insert "melon", 2
@@ -1088,7 +1088,7 @@ class PDeque
   # This method returns the value of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 1
   #   pd.insert 4
   #   pd.insert 3
@@ -1107,13 +1107,13 @@ class PDeque
   #
   # The iteration order is unspecified.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 3
   #   pd.insert 1
   #   pd.insert 2
   #   p pd.delete_min           #=> 1
   #   pd.each_locator {|v|
-  #     p v     #=> #<PDeque::Locator: 2>, #<PDeque::Locator: 3>
+  #     p v     #=> #<Depq::Locator: 2>, #<Depq::Locator: 3>
   #   }
   #
   def each_locator # :yield: locator
@@ -1125,7 +1125,7 @@ class PDeque
 
   # iterate over the values and priorities in the queue.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert "durian", 1
   #   pd.insert "banana", 3
   #   pd.insert "melon", 2
@@ -1147,7 +1147,7 @@ class PDeque
   #
   # The iteration order is unspecified.
   #
-  #   pd = PDeque.new
+  #   pd = Depq.new
   #   pd.insert 3
   #   pd.insert 1
   #   pd.insert 2
@@ -1167,12 +1167,12 @@ class PDeque
   #
   # The result array is ordered from the minimum element.
   #
-  #   p PDeque.nlargest(3, [5, 2, 3, 1, 4, 6, 7]) #=> [5, 6, 7]
+  #   p Depq.nlargest(3, [5, 2, 3, 1, 4, 6, 7]) #=> [5, 6, 7]
   #
-  def PDeque.nlargest(n, iter)
+  def Depq.nlargest(n, iter)
     limit = (n * Math.log(1+n)).ceil
     limit = 1024 if limit < 1024
-    pd = PDeque.new
+    pd = Depq.new
     threshold = nil
     iter.each {|v|
       if pd.size < n
@@ -1206,12 +1206,12 @@ class PDeque
   #
   # The result array is ordered from the minimum element.
   #
-  #   p PDeque.nsmallest(5, [5, 2, 3, 1, 4, 6, 7]) #=> [1, 2, 3, 4, 5]
+  #   p Depq.nsmallest(5, [5, 2, 3, 1, 4, 6, 7]) #=> [1, 2, 3, 4, 5]
   #
-  def PDeque.nsmallest(n, iter)
+  def Depq.nsmallest(n, iter)
     limit = (n * Math.log(1+n)).ceil
     limit = 1024 if limit < 1024
-    pd = PDeque.new
+    pd = Depq.new
     threshold = nil
     iter.each {|v|
       if pd.size < n
@@ -1247,7 +1247,7 @@ class PDeque
   # The iteration order is sorted, from minimum to maximum,
   # if all the arugment iterators are sorted.
   #
-  #   PDeque.merge(1..4, 3..6) {|v| p v }
+  #   Depq.merge(1..4, 3..6) {|v| p v }
   #   #=> 1
   #   #   2
   #   #   3
@@ -1257,8 +1257,8 @@ class PDeque
   #   #   5
   #   #   6
   #
-  def PDeque.merge(*iters, &b)
-    pd = PDeque.new
+  def Depq.merge(*iters, &b)
+    pd = Depq.new
     iters.each {|enum|
       enum = enum.to_enum unless enum.kind_of? Enumerator
       begin

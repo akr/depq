@@ -1,7 +1,7 @@
-require 'pdeque'
+require './depq'
 require 'test/unit'
 
-class PDeque
+class Depq
   module SimpleHeap
     def validation(pd, ary)
       0.upto(size(ary)-1) {|i|
@@ -41,7 +41,7 @@ class PDeque
   end
 end
 
-class TestPDeque < Test::Unit::TestCase
+class TestDepq < Test::Unit::TestCase
   def random_test(mode, incremental)
     case mode
     when :min
@@ -55,7 +55,7 @@ class TestPDeque < Test::Unit::TestCase
     else
       raise "wrong mode"
     end
-    pd = PDeque.new
+    pd = Depq.new
     n = 10
     a1 = []
     n.times {
@@ -86,7 +86,7 @@ class TestPDeque < Test::Unit::TestCase
   def perm_test(ary, incremental)
     a0 = ary.to_a.sort
     a0.permutation {|a1|
-      pd = PDeque.new
+      pd = Depq.new
       a1.each {|v|
         pd.insert v
         if incremental
@@ -114,7 +114,7 @@ class TestPDeque < Test::Unit::TestCase
     a0.permutation {|a1|
       0.upto(2**(a1.length-1)-1) {|n|
         #log = []; p [:n, n, 2**(a1.length-1)-1]
-        pd = PDeque.new
+        pd = Depq.new
         a1.each_with_index {|v,i|
           pd.insert v
           #log << v
@@ -139,7 +139,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_stable_min
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert "a", 0
     pd.insert "b", 0
     pd.insert "c", 0
@@ -149,7 +149,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_stable_max
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert "a", 0
     pd.insert "b", 0
     pd.insert "c", 0
@@ -159,9 +159,9 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_locator_new
-    pd = PDeque.new
-    loc1 = PDeque::Locator.new(1)
-    loc2 = PDeque::Locator.new(2, 3)
+    pd = Depq.new
+    loc1 = Depq::Locator.new(1)
+    loc2 = Depq::Locator.new(2, 3)
     assert_equal(1, loc1.value)
     assert_equal(1, loc1.priority)
     assert_equal(2, loc2.value)
@@ -173,13 +173,13 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_locator_eql
-    loc1 = PDeque::Locator.new(1,2,3)
-    loc2 = PDeque::Locator.new(1,2,3)
+    loc1 = Depq::Locator.new(1,2,3)
+    loc2 = Depq::Locator.new(1,2,3)
     assert(!loc1.eql?(loc2))
   end
 
   def test_locator_priority
-    pd = PDeque.new
+    pd = Depq.new
     loc2 = pd.insert(Object.new, 2)
     loc1 = pd.insert(Object.new, 1)
     loc3 = pd.insert(Object.new, 3)
@@ -191,7 +191,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_locator_update_min
-    pd = PDeque.new
+    pd = Depq.new
     a = pd.insert("a", 2)
     b = pd.insert("b", 1)
     c = pd.insert("c", 3)
@@ -209,7 +209,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_locator_update_subpriority_min
-    pd = PDeque.new
+    pd = Depq.new
     a = pd.insert("a", 1, 0)
     b = pd.insert("b", 2, 1)
     c = pd.insert("c", 1, 2)
@@ -230,7 +230,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_locator_update_subpriority_max
-    pd = PDeque.new
+    pd = Depq.new
     a = pd.insert("a", 1, 0)
     b = pd.insert("b", 2, 1)
     c = pd.insert("c", 1, 2)
@@ -251,7 +251,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_locator_update_max
-    pd = PDeque.new
+    pd = Depq.new
     a = pd.insert("a", 2)
     b = pd.insert("b", 1)
     c = pd.insert("c", 3)
@@ -266,7 +266,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_locator_update_value
-    pd = PDeque.new
+    pd = Depq.new
     loc = pd.insert 1, 2, 3
     assert_equal(1, loc.value)
     assert_equal(2, loc.priority)
@@ -278,7 +278,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_locator_update_priority
-    pd = PDeque.new
+    pd = Depq.new
     loc = pd.insert 1, 2, 3
     assert_equal(1, loc.value)
     assert_equal(2, loc.priority)
@@ -306,7 +306,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_locator_subpriority
-    pd = PDeque.new
+    pd = Depq.new
     loc1 = pd.insert(Object.new, 1, 11)
     loc2 = pd.insert(Object.new, 2, 12)
     loc3 = pd.insert(Object.new, 3, 13)
@@ -321,19 +321,19 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_new
-     pd = PDeque.new
+     pd = Depq.new
      pd.insert "Foo"
      pd.insert "bar"
      assert_equal("Foo", pd.delete_min)
      assert_equal("bar", pd.delete_min)
   
-     pd = PDeque.new(:casecmp)
+     pd = Depq.new(:casecmp)
      pd.insert "Foo"
      pd.insert "bar"
      assert_equal("bar", pd.delete_min)
      assert_equal("Foo", pd.delete_min)
   
-     pd = PDeque.new(lambda {|a,b| a.casecmp(b) })
+     pd = Depq.new(lambda {|a,b| a.casecmp(b) })
      pd.insert "Foo"
      pd.insert "bar"
      assert_equal("bar", pd.delete_min)
@@ -341,7 +341,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_dup
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     pd2 = pd.dup
     pd.validation
@@ -362,7 +362,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_marshal
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     pd2 = Marshal.load(Marshal.dump(pd))
     pd.validation
@@ -383,11 +383,11 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_compare_priority
-    pd = PDeque.new
+    pd = Depq.new
     assert_operator(pd.compare_priority("a", "b"), :<, 0)
     assert_operator(pd.compare_priority("a", "a"), :==, 0)
     assert_operator(pd.compare_priority("b", "a"), :>, 0)
-    pd = PDeque.new(:casecmp)
+    pd = Depq.new(:casecmp)
     assert_operator(pd.compare_priority("a", "b"), :<, 0)
     assert_operator(pd.compare_priority("a", "B"), :<, 0)
     assert_operator(pd.compare_priority("A", "b"), :<, 0)
@@ -400,7 +400,7 @@ class TestPDeque < Test::Unit::TestCase
     assert_operator(pd.compare_priority("b", "A"), :>, 0)
     assert_operator(pd.compare_priority("B", "a"), :>, 0)
     assert_operator(pd.compare_priority("B", "A"), :>, 0)
-    pd = PDeque.new(lambda {|a,b| [a[1],a[0]] <=> [b[1],b[0]]})
+    pd = Depq.new(lambda {|a,b| [a[1],a[0]] <=> [b[1],b[0]]})
     assert_operator(pd.compare_priority([0,0], [0,0]), :==, 0)
     assert_operator(pd.compare_priority([0,0], [0,1]), :<, 0)
     assert_operator(pd.compare_priority([0,0], [1,0]), :<, 0)
@@ -420,14 +420,14 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_empty?
-    pd = PDeque.new
+    pd = Depq.new
     assert(pd.empty?)
     pd.insert 1
     assert(!pd.empty?)
   end
 
   def test_size
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     assert_equal(1, pd.size)
     pd.insert 10
@@ -439,7 +439,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_totalcount
-    pd = PDeque.new
+    pd = Depq.new
     assert_equal(0, pd.totalcount)
     pd.insert 1
     assert_equal(1, pd.totalcount)
@@ -460,7 +460,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_clear
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     assert(!pd.empty?)
     pd.clear
@@ -468,7 +468,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_insert
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     pd.insert 10
     pd.insert 2
@@ -478,7 +478,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_insert_all
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert_all [3,1,2]
     assert_equal(1, pd.delete_min)
     assert_equal(2, pd.delete_min)
@@ -487,7 +487,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_find_min_locator
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     loc = pd.find_min_locator
     assert_equal(1, loc.value)
@@ -498,13 +498,13 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_find_min
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     assert_equal(1, pd.find_min)
   end
 
   def test_find_min_priority
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert "a", 1
     assert_equal(["a", 1], pd.find_min_priority)
     pd.delete_min
@@ -512,7 +512,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_find_max_locator
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     loc = pd.find_max_locator
     assert_equal(1, loc.value)
@@ -521,13 +521,13 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_find_max
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     assert_equal(1, pd.find_max)
   end
 
   def test_find_max_priority
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert "a", 1
     assert_equal(["a", 1], pd.find_max_priority)
     pd.delete_max
@@ -535,7 +535,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_find_minmax_locator
-    pd = PDeque.new
+    pd = Depq.new
     assert_equal([nil, nil], pd.find_minmax_locator)
     loc3 = pd.insert 3
     loc1 = pd.insert 1
@@ -545,7 +545,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_find_minmax
-    pd = PDeque.new
+    pd = Depq.new
     assert_equal([nil, nil], pd.find_minmax)
     pd.insert 3
     pd.insert 1
@@ -555,11 +555,11 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_delete_locator
-    pd = PDeque.new
+    pd = Depq.new
     loc = pd.insert 1
     pd.delete_locator loc
     assert(pd.empty?)
-    pd = PDeque.new
+    pd = Depq.new
     loc = pd.insert 2
     pd.insert 3
     pd.insert 1
@@ -570,7 +570,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_delete_min
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     pd.insert 2
     pd.insert 0
@@ -581,7 +581,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_delete_min_locator
-    pd = PDeque.new
+    pd = Depq.new
     loc1 = pd.insert 1
     loc2 = pd.insert 2
     loc0 = pd.insert 0
@@ -592,7 +592,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_delete_max
-    pd = PDeque.new
+    pd = Depq.new
     pd.insert 1
     pd.insert 2
     pd.insert 0
@@ -603,7 +603,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_delete_max_locator
-    pd = PDeque.new
+    pd = Depq.new
     loc1 = pd.insert 1
     loc2 = pd.insert 2
     loc0 = pd.insert 0
@@ -614,7 +614,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_delete_unspecified
-    pd = PDeque.new
+    pd = Depq.new
     a1 = [1,2,0]
     a1.each {|v|
       pd.insert v
@@ -628,7 +628,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_delete_unspecified_priority
-    pd = PDeque.new
+    pd = Depq.new
     a1 = [[1,8],[2,3],[0,5]]
     a1.each {|val, priority|
       pd.insert val, priority
@@ -642,7 +642,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_delete_unspecified_locator
-    pd = PDeque.new
+    pd = Depq.new
     a1 = [1,2,0]
     a1.each {|v|
       pd.insert v
@@ -656,7 +656,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_each
-    pd = PDeque.new
+    pd = Depq.new
     a = [1,2,0]
     a.each {|v|
       pd.insert v
@@ -667,7 +667,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_each_with_priority
-    pd = PDeque.new
+    pd = Depq.new
     h = {}
     h["durian"] = 1
     h["banana"] = 3
@@ -681,7 +681,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_each_locator
-    pd = PDeque.new
+    pd = Depq.new
     a = [1,2,0]
     a.each {|v|
       pd.insert v
@@ -692,37 +692,37 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_nlargest
-    a = PDeque.nlargest(3, [5, 1, 3, 2, 4, 6, 7])
+    a = Depq.nlargest(3, [5, 1, 3, 2, 4, 6, 7])
     assert_equal([5, 6, 7], a)
 
-    assert_equal([1,2], PDeque.nlargest(3, [1,2]))
+    assert_equal([1,2], Depq.nlargest(3, [1,2]))
 
     a = []
     2000.times { a << rand }
     b = a.sort
-    assert_equal(b[-30..-1], PDeque.nlargest(30, a))
+    assert_equal(b[-30..-1], Depq.nlargest(30, a))
   end
 
   def test_nsmallest
-    a = PDeque.nsmallest(5, [5, 2, 3, 1, 4, 6, 7])
+    a = Depq.nsmallest(5, [5, 2, 3, 1, 4, 6, 7])
     assert_equal([1, 2, 3, 4, 5], a)
 
-    assert_equal([1,2], PDeque.nsmallest(3, [1,2]))
+    assert_equal([1,2], Depq.nsmallest(3, [1,2]))
 
     a = []
     2000.times { a << rand }
     b = a.sort
-    assert_equal(b[0, 30], PDeque.nsmallest(30, a))
+    assert_equal(b[0, 30], Depq.nsmallest(30, a))
   end
 
   def test_merge
     a = []
-    PDeque.merge(1..4, 3..6) {|v| a << v }
+    Depq.merge(1..4, 3..6) {|v| a << v }
     assert_equal([1,2,3,3,4,4,5,6], a)
   end
 
   def test_merge_enumerator
-    loc = PDeque.merge(1..4, 3..6)
+    loc = Depq.merge(1..4, 3..6)
     assert_equal(1, loc.next)
     assert_equal(2, loc.next)
     assert_equal(3, loc.next)
@@ -735,7 +735,7 @@ class TestPDeque < Test::Unit::TestCase
   end
 
   def test_merge_enumerator2
-    loc = PDeque.merge(1..4, 3..6)
+    loc = Depq.merge(1..4, 3..6)
     a = []
     loc.each_slice(2) {|x|
       a << x
