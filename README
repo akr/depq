@@ -1,0 +1,181 @@
+Depq - Feature Rich Double-Ended Priority Queue.
+
+= Features
+
+* queue - you can insert and delete values
+* priority - you can get a value with minimum priority
+* double-ended - you can get a value with maximum priority too
+* stable - you don't need to maintain timestamps yourself
+* update priority - usable for Dijkstra's shortest path algorithm and various graph algorithms
+* implicit binary heap - most operations are O(log n) at worst
+
+= Introduction
+
+== Simple Insertion/Deletion
+
+You can insert values into a Depq object.
+You can deletes the values from the object from ascending/descending order.
+delete_min deletes the minimum value.
+It is used for ascending order.
+
+  pd = Depq.new
+  pd.insert "durian"
+  pd.insert "banana"
+  p pd.delete_min     #=> "banana"
+  pd.insert "orange"
+  pd.insert "apple"
+  pd.insert "melon"
+  p pd.delete_min     #=> "apple"
+  p pd.delete_min     #=> "durian"
+  p pd.delete_min     #=> "melon"
+  p pd.delete_min     #=> "orange"
+  p pd.delete_min     #=> nil
+
+delete_max is similar to delete_min except it deletes maximum element
+instead of minimum.
+It is used for descending order.
+
+== The Order
+
+The order is defined by the priorities corresnponds to the values and
+comparison operator specified for the queue.
+
+  pd = Depq.new(:casecmp)   # use casecmp instead of <=>.
+  pd.inesrt 1, "Foo"          # specify the priority for 1 as "Foo"
+  pd.insert 2, "bar"
+  pd.insert 3, "Baz"
+  p pd.delete_min     #=> 2   # "bar" is minimum
+  p pd.delete_min     #=> 3
+  p pd.delete_min     #=> 1   # "Foo" is maximum
+  p pd.delete_min     #=> nil
+
+If there are multiple values with same priority, subpriority is used to compare them.
+subpriority is an integer which can be specified by 3rd argument of insert.
+If it is not specified, total number of inserted elements is used.
+So Depq is "stable" with delete_min.
+The element inserted first is minimum and deleted first.
+
+  pd = Depq.new
+  pd.insert "a", 1    # "a", "c" and "e" has same priority: 1
+  pd.insert "b", 0    # "b", "d" and "f" has same priority: 0
+  pd.insert "c", 1
+  pd.insert "d", 0
+  pd.insert "e", 1
+  pd.insert "f", 0
+  p pd.delete_min     #=> "b"         first element with priority 0
+  p pd.delete_min     #=> "d"
+  p pd.delete_min     #=> "f"         last element with priority 0
+  p pd.delete_min     #=> "a"         first element with priority 1
+  p pd.delete_min     #=> "c"
+  p pd.delete_min     #=> "e"         last element with priority 1
+
+Note that delete_max is also stable.
+This means delete_max deletes the element with maximum priority with "minimum" subpriority.
+
+== Update Element
+
+An inserted element can be modified and/or deleted.
+This is done using Depq::Locator object.
+It is returned by insert, find_min_locator, etc.
+
+  pd = Depq.new
+  d = pd.insert "durian", 1
+  m = pd.insert "mangosteen", 2
+  c = pd.insert "cherry", 3
+  p m                         #=> #<Depq::Locator: "mangosteen":2>
+  p m.value                   #=> "mangosteen"
+  p m.priority                #=> 2
+  p pd.find_min               #=> "durian"
+  p pd.find_min_locator       #=> #<Depq::Locator: "durian":1>
+  m.update("mangosteen", 0)
+  p pd.find_min               #=> "mangosteen"
+  p pd.find_min_locator       #=> #<Depq::Locator: "mangosteen":0>
+  pd.delete_element d
+  p pd.delete_min             #=> "mangosteen"
+  p pd.delete_min             #=> "cherry"
+  p pd.delete_min             #=> nil
+
+For example, this feature can be used for graph algorithms
+such as Dijkstra's shortest path finding algorithm,
+A* search algorithm, etc.
+
+   def dijkstra_shortest_path(start, edges)
+     h = {}
+     edges.each {|v1, v2, w|
+       (h[v1] ||= []) << [v2, w]
+     }
+     h.default = []
+     q = Depq.new
+     visited = {start => q.insert([start], 0)}
+     until q.empty?
+       path, w1 = q.delete_min_priority
+       v1 = path.last
+       h[v1].each {|v2, w2|
+         if !visited[v2]
+           visited[v2] = q.insert(path+[v2], w1 + w2)
+         elsif w1 + w2 < visited[v2].priority
+           visited[v2].update(path+[v2], w1 + w2)     # update val/prio
+         end
+       }
+     end
+     result = []
+     visited.each_value {|loc|
+       result << [loc.value, loc.priority]
+     }
+     result
+   end
+
+   E = [
+     ['A', 'B', 2],
+     ['A', 'C', 4],
+     ['B', 'C', 1],
+     ['C', 'B', 2],
+     ['B', 'D', 3],
+     ['C', 'D', 1],
+   ]
+   p dijkstra_shortest_path('A', E)
+   #=> [[["A"], 0],
+   #    [["A", "B"], 2],
+   #    [["A", "B", "C"], 3],
+   #    [["A", "B", "C", "D"], 4]]
+
+= Internal Heap Algorithm and Performance Tips
+
+Depq uses min-heap or max-heap internally.
+When delete_min is used, min-heap is constructed and max-heap is destructed.
+When delete_max is used, max-heap is constructed and min-heap is destructed.
+So mixing delete_min and delete_max causes bad performance.
+In future, min-max-heap may be implemented to avoid this problem.
+min-max-heap will be used when delete_min and delete_max is used both.
+(Because min-max-heap is slower than min-heap/max-heap.)
+
+= Author
+
+Tanaka Akira <akr@fsij.org>
+
+= License
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+(1) Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+(2) Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+(3) The name of the author may not be used to endorse or promote products
+    derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+OF SUCH DAMAGE.
+
+(The modified BSD licence)
+
