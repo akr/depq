@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'depq'
-  s.version = '0.1.1'
+  s.version = '0.1'
   s.date = '2009-09-20'
   s.author = 'Tanaka Akira'
   s.email = 'akr@fsij.org'
