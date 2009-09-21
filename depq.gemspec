@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.test_files = %w[test-depq.rb]
   s.has_rdoc = true
   s.homepage = 'http://depq.rubyforge.org/'
+  s.rubyforge_project = 'depq'
   s.require_path = '.'
   s.summary = 'Stable Double-Ended Priority Queue.'
   s.description = <<'End'
