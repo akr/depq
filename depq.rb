@@ -165,15 +165,12 @@
 #    #    [["A", "B", "C"], 3],
 #    #    [["A", "B", "C", "D"], 4]]
 #
-# = Internal Heap Algorithm and Performance Tips
+# = Internal Heap Algorithm
 #
-# Depq uses min-heap or max-heap internally.
-# When delete_min is used, min-heap is constructed and max-heap is destructed.
-# When delete_max is used, max-heap is constructed and min-heap is destructed.
-# So mixing delete_min and delete_max causes bad performance.
-# In future, min-max-heap may be implemented to avoid this problem.
-# min-max-heap will be used when delete_min and delete_max is used both.
-# (Because min-max-heap is slower than min-heap/max-heap.)
+# Depq uses min-heap, max-heap or interval-heap internally.
+# When delete_min is used, min-heap is constructed.
+# When delete_max is used, max-heap is constructed.
+# When delete_min and delete_max is used, interval-heap is constructed.
 #
 class Depq
   include Enumerable
