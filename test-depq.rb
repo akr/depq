@@ -580,6 +580,28 @@ class TestDepq < Test::Unit::TestCase
     assert_equal([1, 3], res)
   end
 
+  def test_find_minmax_after_min
+    pd = Depq.new
+    assert_equal([nil, nil], pd.find_minmax)
+    pd.insert 3
+    pd.insert 1
+    pd.insert 2
+    assert_equal(1, pd.min)
+    res = pd.find_minmax
+    assert_equal([1, 3], res)
+  end
+
+  def test_find_minmax_after_max
+    pd = Depq.new
+    assert_equal([nil, nil], pd.find_minmax)
+    pd.insert 3
+    pd.insert 1
+    pd.insert 2
+    assert_equal(3, pd.max)
+    res = pd.find_minmax
+    assert_equal([1, 3], res)
+  end
+
   def test_delete_locator
     pd = Depq.new
     loc = pd.insert 1

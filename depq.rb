@@ -862,8 +862,7 @@ class Depq
   #
   def find_minmax_locator
     return [nil, nil] if empty?
-    case @mode
-    when :min
+    if @mode == MinHeap
       loc1 = find_min_locator
       loc2 = loc1
       self.each_locator {|loc|
@@ -871,7 +870,7 @@ class Depq
           loc2 = loc
         end
       }
-    when :max
+    elsif @mode == MaxHeap
       loc2 = find_max_locator
       loc1 = loc2
       self.each_locator {|loc|
