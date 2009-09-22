@@ -1,6 +1,5 @@
 = Depq - Feature Rich Double-Ended Priority Queue.
 
-
 = Features
 
 * queue - you can insert and delete values
