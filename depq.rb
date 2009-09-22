@@ -661,7 +661,7 @@ class Depq
       set_entry(loc.send(:index), loc, priority, subpriority)
     else
       mode_heapify
-      @mode.update_priority(self, @ary, loc, priority, subpriority)
+      @mode.update_prio(self, @ary, loc, priority, subpriority)
     end
   end
   private :internal_set_priority
@@ -768,7 +768,7 @@ class Depq
   def find_min_locator
     return nil if empty?
     use_min
-    @mode.find_min_locator(self, @ary)
+    @mode.find_min_loc(self, @ary)
   end
 
   # return the minimum value with its priority.
@@ -822,7 +822,7 @@ class Depq
   def find_max_locator
     return nil if empty?
     use_max
-    @mode.find_max_locator(self, @ary)
+    @mode.find_max_loc(self, @ary)
   end
 
   # return the maximum value with its priority.
@@ -874,7 +874,7 @@ class Depq
   def find_minmax_locator
     return [nil, nil] if empty?
     use_minmax
-    return @mode.find_minmax_locator(self, @ary)
+    return @mode.find_minmax_loc(self, @ary)
   end
 
   # returns the minimum and maximum value as a two-element array.
@@ -916,7 +916,7 @@ class Depq
       loc
     else
       mode_heapify
-      @heapsize = @mode.delete_locator(self, @ary, loc)
+      @heapsize = @mode.delete_loc(self, @ary, loc)
       loc
     end
   end
@@ -938,8 +938,8 @@ class Depq
   def delete_min_locator
     return nil if empty?
     use_min
-    loc = @mode.find_min_locator(self, @ary)
-    @heapsize = @mode.delete_locator(self, @ary, loc)
+    loc = @mode.find_min_loc(self, @ary)
+    @heapsize = @mode.delete_loc(self, @ary, loc)
     loc
   end
 
@@ -1003,8 +1003,8 @@ class Depq
   def delete_max_locator
     return nil if empty?
     use_max
-    loc = @mode.find_max_locator(self, @ary)
-    @heapsize = @mode.delete_locator(self, @ary, loc)
+    loc = @mode.find_max_loc(self, @ary)
+    @heapsize = @mode.delete_loc(self, @ary, loc)
     loc
   end
 
@@ -1371,12 +1371,12 @@ class Depq
       end
     end
 
-    def find_top_locator(q, ary)
+    def find_top_loc(q, ary)
       loc, _ = get_entry(ary, 0)
       loc
     end
 
-    def delete_locator(q, ary, loc)
+    def delete_loc(q, ary, loc)
       i = loc.send(:index)
       _, priority, subpriority = get_entry(ary, i)
       last = size(ary) - 1
@@ -1448,7 +1448,7 @@ class Depq
       q.send(:compare_for_min, pi, si, pj, sj) <= 0
     end
 
-    def update_priority(q, ary, loc, priority, subpriority)
+    def update_prio(q, ary, loc, priority, subpriority)
       i = loc.send(:index)
       ei, pi, si = get_entry(ary, i)
       cmp = q.send(:compare_for_min, pi, si, priority, subpriority)
@@ -1462,7 +1462,7 @@ class Depq
       end
     end
 
-    alias find_min_locator find_top_locator
+    alias find_min_loc find_top_loc
   end
 
   module MaxHeap
@@ -1476,7 +1476,7 @@ class Depq
       q.send(:compare_for_max, pi, si, pj, sj) >= 0
     end
 
-    def update_priority(q, ary, loc, priority, subpriority)
+    def update_prio(q, ary, loc, priority, subpriority)
       i = loc.send(:index)
       ei, pi, si = get_entry(ary, i)
       subpriority ||= si
@@ -1491,7 +1491,7 @@ class Depq
       end
     end
 
-    alias find_max_locator find_top_locator
+    alias find_max_loc find_top_loc
   end
 
   module IntervalHeap
@@ -1735,7 +1735,7 @@ class Depq
       downheap_sub(q, ary, i, range)
     end
 
-    def update_priority(q, ary, loc, prio, subprio)
+    def update_prio(q, ary, loc, prio, subprio)
       i = loc.send(:index)
       ei, pi, si = get_entry(ary, i)
       subpriority ||= si
@@ -1759,7 +1759,7 @@ class Depq
       currentsize
     end
 
-    def find_minmax_locator(q, ary)
+    def find_minmax_loc(q, ary)
       case size(ary)
       when 0
         [nil, nil]
@@ -1778,15 +1778,15 @@ class Depq
       end
     end
 
-    def find_min_locator(q, ary)
-      find_minmax_locator(q, ary).first
+    def find_min_loc(q, ary)
+      find_minmax_loc(q, ary).first
     end
 
-    def find_max_locator(q, ary)
-      find_minmax_locator(q, ary).last
+    def find_max_loc(q, ary)
+      find_minmax_loc(q, ary).last
     end
 
-    def delete_locator(q, ary, loc)
+    def delete_loc(q, ary, loc)
       i = loc.send(:index)
       _, priority, subpriority = get_entry(ary, i)
       last = size(ary) - 1
