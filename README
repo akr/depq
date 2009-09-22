@@ -9,6 +9,10 @@ Depq - Feature Rich Double-Ended Priority Queue.
 * update priority - usable for Dijkstra's shortest path algorithm and various graph algorithms
 * implicit binary heap - most operations are O(log n) at worst
 
+= Install
+
+  gem install depq
+
 = Introduction
 
 == Simple Insertion/Deletion
