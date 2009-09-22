@@ -29,16 +29,16 @@ require 'test/unit'
 
 class Depq
   module SimpleHeap
-    def validation(pd, ary)
+    def validation(q, ary)
       0.upto(size(ary)-1) {|i|
         _, x = get_entry(ary, i)
         j = i*2+1
         k = i*2+2
-        if j < size(ary) && !upper?(pd, ary, i, j)
+        if j < size(ary) && !upper?(q, ary, i, j)
           _, y = get_entry(ary, j)
           raise "wrong binary heap: pri[#{i}]=#{x.inspect} > #{y.inspect}=pri[#{j}]"
         end
-        if k < size(ary) && !upper?(pd, ary, i, k)
+        if k < size(ary) && !upper?(q, ary, i, k)
           _, z = get_entry(ary, k)
           raise "wrong binary heap: pri[#{i}]=#{x.inspect} > #{z.inspect}=pri[#{k}]"
         end
@@ -46,25 +46,25 @@ class Depq
     end
   end
 
-  def IntervalHeap.validation(pd, ary)
+  def IntervalHeap.validation(q, ary)
     range=0...size(ary)
     range.each {|j|
       imin = parent_minside(j)
       imax = parent_maxside(j)
       jmin = minside(j)
-      if minside?(j) && range.include?(imin) && pcmp(pd, ary, imin, j) > 0
+      if minside?(j) && range.include?(imin) && pcmp(q, ary, imin, j) > 0
         raise "ary[#{imin}].priority > ary[#{j}].priority "
       end
-      if maxside?(j) && range.include?(imax) && pcmp(pd, ary, imax, j) < 0
+      if maxside?(j) && range.include?(imax) && pcmp(q, ary, imax, j) < 0
         raise "ary[#{imax}].priority < ary[#{j}].priority "
       end
-      if range.include?(imin) && pcmp(pd, ary, imin, j) == 0 && scmp(pd, ary, imin, j) > 0
+      if range.include?(imin) && pcmp(q, ary, imin, j) == 0 && scmp(q, ary, imin, j) > 0
         raise "ary[#{imin}].subpriority < ary[#{j}].subpriority "
       end
-      if range.include?(imax) && pcmp(pd, ary, imax, j) == 0 && scmp(pd, ary, imax, j) > 0
+      if range.include?(imax) && pcmp(q, ary, imax, j) == 0 && scmp(q, ary, imax, j) > 0
         raise "ary[#{imax}].subpriority < ary[#{j}].subpriority "
       end
-      if maxside?(j) && range.include?(jmin) && pcmp(pd, ary, jmin, j) == 0 && scmp(pd, ary, jmin, j) > 0
+      if maxside?(j) && range.include?(jmin) && pcmp(q, ary, jmin, j) == 0 && scmp(q, ary, jmin, j) > 0
         raise "ary[#{jmin}].subpriority < ary[#{j}].subpriority "
       end
     }
@@ -83,8 +83,8 @@ class Depq
       if loc.send(:index) != i
         raise "index mismatch"
       end
-      unless self.equal? loc.pdeque 
-        raise "pdeque mismatch"
+      unless self.equal? loc.depq 
+        raise "depq mismatch"
       end
       i += 1
     }
@@ -105,23 +105,23 @@ class TestDepq < Test::Unit::TestCase
     else
       raise "wrong mode"
     end
-    pd = Depq.new
+    q = Depq.new
     n = 10
     a1 = []
     n.times {
       r = rand(n)
       a1 << r
-      pd.insert(r)
+      q.insert(r)
       if incremental
-        pd.send find
-        pd.validation
+        q.send find
+        q.validation
       end
     }
     a1.sort!(&cmp)
     a2 = []
     n.times {
-      a2 << pd.send(delete)
-      pd.validation
+      a2 << q.send(delete)
+      q.validation
     }
     assert_equal(a1, a2)
   end
@@ -136,18 +136,18 @@ class TestDepq < Test::Unit::TestCase
   def perm_test(ary, incremental)
     a0 = ary.to_a.sort
     a0.permutation {|a1|
-      pd = Depq.new
+      q = Depq.new
       a1.each {|v|
-        pd.insert v
+        q.insert v
         if incremental
-          pd.find_min
-          pd.validation
+          q.find_min
+          q.validation
         end
       }
-      pd.find_min
-      pd.validation
+      q.find_min
+      q.validation
       a0.each {|v|
-        assert_equal(v, pd.delete_min)
+        assert_equal(v, q.delete_min)
       }
     }
   end
@@ -164,19 +164,19 @@ class TestDepq < Test::Unit::TestCase
     a0.permutation {|a1|
       0.upto(2**(a1.length-1)-1) {|n|
         #log = []; p [:n, n, 2**(a1.length-1)-1]
-        pd = Depq.new
+        q = Depq.new
         a1.each_with_index {|v,i|
-          pd.insert v
+          q.insert v
           #log << v
           if n[i] != 0
-            pd.find_min
-            pd.validation
+            q.find_min
+            q.validation
             #log << :find_min
           end
         }
         #p log
         a0.each {|v|
-          assert_equal(v, pd.delete_min)
+          assert_equal(v, q.delete_min)
         }
       }
     }
@@ -189,37 +189,37 @@ class TestDepq < Test::Unit::TestCase
   end
 
   def test_stable_min
-    pd = Depq.new
-    pd.insert "a", 0
-    pd.insert "b", 0
-    pd.insert "c", 0
-    assert_equal("a", pd.delete_min)
-    assert_equal("b", pd.delete_min)
-    assert_equal("c", pd.delete_min)
+    q = Depq.new
+    q.insert "a", 0
+    q.insert "b", 0
+    q.insert "c", 0
+    assert_equal("a", q.delete_min)
+    assert_equal("b", q.delete_min)
+    assert_equal("c", q.delete_min)
   end
 
   def test_stable_max
-    pd = Depq.new
-    pd.insert "a", 0
-    pd.insert "b", 0
-    pd.insert "c", 0
-    assert_equal("a", pd.delete_max)
-    assert_equal("b", pd.delete_max)
-    assert_equal("c", pd.delete_max)
+    q = Depq.new
+    q.insert "a", 0
+    q.insert "b", 0
+    q.insert "c", 0
+    assert_equal("a", q.delete_max)
+    assert_equal("b", q.delete_max)
+    assert_equal("c", q.delete_max)
   end
 
   def test_locator_new
-    pd = Depq.new
+    q = Depq.new
     loc1 = Depq::Locator.new(1)
     loc2 = Depq::Locator.new(2, 3)
     assert_equal(1, loc1.value)
     assert_equal(1, loc1.priority)
     assert_equal(2, loc2.value)
     assert_equal(3, loc2.priority)
-    pd.insert_locator loc1
-    pd.insert_locator loc2
-    assert_equal(loc1, pd.delete_min_locator)
-    assert_equal(loc2, pd.delete_min_locator)
+    q.insert_locator loc1
+    q.insert_locator loc2
+    assert_equal(loc1, q.delete_min_locator)
+    assert_equal(loc2, q.delete_min_locator)
   end
 
   def test_locator_eql
@@ -229,50 +229,50 @@ class TestDepq < Test::Unit::TestCase
   end
 
   def test_locator_priority
-    pd = Depq.new
-    loc2 = pd.insert(Object.new, 2)
-    loc1 = pd.insert(Object.new, 1)
-    loc3 = pd.insert(Object.new, 3)
+    q = Depq.new
+    loc2 = q.insert(Object.new, 2)
+    loc1 = q.insert(Object.new, 1)
+    loc3 = q.insert(Object.new, 3)
     assert_equal(1, loc1.priority)
     assert_equal(2, loc2.priority)
     assert_equal(3, loc3.priority)
-    pd.delete_locator(loc1)
+    q.delete_locator(loc1)
     assert_equal(1, loc1.priority)
   end
 
   def test_locator_update_min
-    pd = Depq.new
-    a = pd.insert("a", 2)
-    b = pd.insert("b", 1)
-    c = pd.insert("c", 3)
-    assert_equal(b, pd.find_min_locator)
+    q = Depq.new
+    a = q.insert("a", 2)
+    b = q.insert("b", 1)
+    c = q.insert("c", 3)
+    assert_equal(b, q.find_min_locator)
     a.update("d", 0)
     assert_equal("d", a.value)
-    assert_equal(a, pd.find_min_locator)
+    assert_equal(a, q.find_min_locator)
     a.update("e", 10)
-    assert_equal("b", pd.delete_min)
-    assert_equal("c", pd.delete_min)
-    assert_equal("e", pd.delete_min)
+    assert_equal("b", q.delete_min)
+    assert_equal("c", q.delete_min)
+    assert_equal("e", q.delete_min)
     a.update "z", 20
     assert_equal("z", a.value)
     assert_equal(20, a.priority)
   end
 
   def test_locator_update_subpriority_min
-    pd = Depq.new
-    a = pd.insert("a", 1, 0)
-    b = pd.insert("b", 2, 1)
-    c = pd.insert("c", 1, 2)
-    d = pd.insert("d", 2, 3)
-    e = pd.insert("e", 1, 4)
-    f = pd.insert("f", 2, 5)
-    assert_equal(a, pd.find_min_locator)
+    q = Depq.new
+    a = q.insert("a", 1, 0)
+    b = q.insert("b", 2, 1)
+    c = q.insert("c", 1, 2)
+    d = q.insert("d", 2, 3)
+    e = q.insert("e", 1, 4)
+    f = q.insert("f", 2, 5)
+    assert_equal(a, q.find_min_locator)
     a.update("A", 1, 10)
-    assert_equal(c, pd.find_min_locator)
+    assert_equal(c, q.find_min_locator)
     a.update("aa", 1, 1)
-    assert_equal(a, pd.find_min_locator)
-    pd.delete_locator a
-    assert_equal(c, pd.find_min_locator)
+    assert_equal(a, q.find_min_locator)
+    q.delete_locator a
+    assert_equal(c, q.find_min_locator)
     a.update("aaa", 10, 20)
     assert_equal("aaa", a.value)
     assert_equal(10, a.priority)
@@ -280,20 +280,20 @@ class TestDepq < Test::Unit::TestCase
   end
 
   def test_locator_update_subpriority_max
-    pd = Depq.new
-    a = pd.insert("a", 1, 0)
-    b = pd.insert("b", 2, 1)
-    c = pd.insert("c", 1, 2)
-    d = pd.insert("d", 2, 3)
-    e = pd.insert("e", 1, 4)
-    f = pd.insert("f", 2, 5)
-    assert_equal(b, pd.find_max_locator)
+    q = Depq.new
+    a = q.insert("a", 1, 0)
+    b = q.insert("b", 2, 1)
+    c = q.insert("c", 1, 2)
+    d = q.insert("d", 2, 3)
+    e = q.insert("e", 1, 4)
+    f = q.insert("f", 2, 5)
+    assert_equal(b, q.find_max_locator)
     b.update("B", 2, 6)
-    assert_equal(d, pd.find_max_locator)
+    assert_equal(d, q.find_max_locator)
     b.update("bb", 2, 0)
-    assert_equal(b, pd.find_max_locator)
-    pd.delete_locator b
-    assert_equal(d, pd.find_max_locator)
+    assert_equal(b, q.find_max_locator)
+    q.delete_locator b
+    assert_equal(d, q.find_max_locator)
     b.update("bbb", -1, -2)
     assert_equal("bbb", b.value)
     assert_equal(-1, b.priority)
@@ -301,23 +301,23 @@ class TestDepq < Test::Unit::TestCase
   end
 
   def test_locator_update_max
-    pd = Depq.new
-    a = pd.insert("a", 2)
-    b = pd.insert("b", 1)
-    c = pd.insert("c", 3)
-    assert_equal(c, pd.find_max_locator)
+    q = Depq.new
+    a = q.insert("a", 2)
+    b = q.insert("b", 1)
+    c = q.insert("c", 3)
+    assert_equal(c, q.find_max_locator)
     b.update("d", 10)
     assert_equal("d", b.value)
-    assert_equal(b, pd.find_max_locator)
+    assert_equal(b, q.find_max_locator)
     b.update("e", 0)
-    assert_equal("c", pd.delete_max)
-    assert_equal("a", pd.delete_max)
-    assert_equal("e", pd.delete_max)
+    assert_equal("c", q.delete_max)
+    assert_equal("a", q.delete_max)
+    assert_equal("e", q.delete_max)
   end
 
   def test_locator_update_value
-    pd = Depq.new
-    loc = pd.insert 1, 2, 3
+    q = Depq.new
+    loc = q.insert 1, 2, 3
     assert_equal(1, loc.value)
     assert_equal(2, loc.priority)
     assert_equal(3, loc.subpriority)
@@ -328,8 +328,8 @@ class TestDepq < Test::Unit::TestCase
   end
 
   def test_locator_update_priority
-    pd = Depq.new
-    loc = pd.insert 1, 2, 3
+    q = Depq.new
+    loc = q.insert 1, 2, 3
     assert_equal(1, loc.value)
     assert_equal(2, loc.priority)
     assert_equal(3, loc.subpriority)
@@ -345,7 +345,7 @@ class TestDepq < Test::Unit::TestCase
     assert_equal(1, loc.value)
     assert_equal(40, loc.priority)
     assert_equal(30, loc.subpriority)
-    pd.delete_min
+    q.delete_min
     assert_equal(1, loc.value)
     assert_equal(40, loc.priority)
     assert_equal(30, loc.subpriority)
@@ -356,409 +356,409 @@ class TestDepq < Test::Unit::TestCase
   end
 
   def test_locator_subpriority
-    pd = Depq.new
-    loc1 = pd.insert(Object.new, 1, 11)
-    loc2 = pd.insert(Object.new, 2, 12)
-    loc3 = pd.insert(Object.new, 3, 13)
+    q = Depq.new
+    loc1 = q.insert(Object.new, 1, 11)
+    loc2 = q.insert(Object.new, 2, 12)
+    loc3 = q.insert(Object.new, 3, 13)
     assert_equal(1, loc1.priority)
     assert_equal(11, loc1.subpriority)
     assert_equal(2, loc2.priority)
     assert_equal(12, loc2.subpriority)
     assert_equal(3, loc3.priority)
     assert_equal(13, loc3.subpriority)
-    pd.delete_locator(loc1)
+    q.delete_locator(loc1)
     assert_equal(11, loc1.subpriority)
   end
 
   def test_new
-     pd = Depq.new
-     pd.insert "Foo"
-     pd.insert "bar"
-     assert_equal("Foo", pd.delete_min)
-     assert_equal("bar", pd.delete_min)
+     q = Depq.new
+     q.insert "Foo"
+     q.insert "bar"
+     assert_equal("Foo", q.delete_min)
+     assert_equal("bar", q.delete_min)
   
-     pd = Depq.new(:casecmp)
-     pd.insert "Foo"
-     pd.insert "bar"
-     assert_equal("bar", pd.delete_min)
-     assert_equal("Foo", pd.delete_min)
+     q = Depq.new(:casecmp)
+     q.insert "Foo"
+     q.insert "bar"
+     assert_equal("bar", q.delete_min)
+     assert_equal("Foo", q.delete_min)
   
-     pd = Depq.new(lambda {|a,b| a.casecmp(b) })
-     pd.insert "Foo"
-     pd.insert "bar"
-     assert_equal("bar", pd.delete_min)
-     assert_equal("Foo", pd.delete_min)
+     q = Depq.new(lambda {|a,b| a.casecmp(b) })
+     q.insert "Foo"
+     q.insert "bar"
+     assert_equal("bar", q.delete_min)
+     assert_equal("Foo", q.delete_min)
   end
 
   def test_dup
-    pd = Depq.new
-    pd.insert 1
-    pd2 = pd.dup
-    pd.validation
-    pd2.validation
-    pd.insert 2
-    pd2.validation
-    assert_equal(1, pd2.delete_min)
-    pd.validation
-    pd2.validation
-    assert_equal(nil, pd2.delete_min)
-    pd.validation
-    pd2.validation
-    assert_equal(1, pd.delete_min)
-    pd.validation
-    pd2.validation
-    assert_equal(2, pd.delete_min)
-    assert_equal(nil, pd.delete_min)
+    q = Depq.new
+    q.insert 1
+    q2 = q.dup
+    q.validation
+    q2.validation
+    q.insert 2
+    q2.validation
+    assert_equal(1, q2.delete_min)
+    q.validation
+    q2.validation
+    assert_equal(nil, q2.delete_min)
+    q.validation
+    q2.validation
+    assert_equal(1, q.delete_min)
+    q.validation
+    q2.validation
+    assert_equal(2, q.delete_min)
+    assert_equal(nil, q.delete_min)
   end
 
   def test_marshal
-    pd = Depq.new
-    pd.insert 1
-    pd2 = Marshal.load(Marshal.dump(pd))
-    pd.validation
-    pd2.validation
-    pd.insert 2
-    pd2.validation
-    assert_equal(1, pd2.delete_min)
-    pd.validation
-    pd2.validation
-    assert_equal(nil, pd2.delete_min)
-    pd.validation
-    pd2.validation
-    assert_equal(1, pd.delete_min)
-    pd.validation
-    pd2.validation
-    assert_equal(2, pd.delete_min)
-    assert_equal(nil, pd.delete_min)
+    q = Depq.new
+    q.insert 1
+    q2 = Marshal.load(Marshal.dump(q))
+    q.validation
+    q2.validation
+    q.insert 2
+    q2.validation
+    assert_equal(1, q2.delete_min)
+    q.validation
+    q2.validation
+    assert_equal(nil, q2.delete_min)
+    q.validation
+    q2.validation
+    assert_equal(1, q.delete_min)
+    q.validation
+    q2.validation
+    assert_equal(2, q.delete_min)
+    assert_equal(nil, q.delete_min)
   end
 
   def test_compare_priority
-    pd = Depq.new
-    assert_operator(pd.compare_priority("a", "b"), :<, 0)
-    assert_operator(pd.compare_priority("a", "a"), :==, 0)
-    assert_operator(pd.compare_priority("b", "a"), :>, 0)
-    pd = Depq.new(:casecmp)
-    assert_operator(pd.compare_priority("a", "b"), :<, 0)
-    assert_operator(pd.compare_priority("a", "B"), :<, 0)
-    assert_operator(pd.compare_priority("A", "b"), :<, 0)
-    assert_operator(pd.compare_priority("A", "B"), :<, 0)
-    assert_operator(pd.compare_priority("a", "a"), :==, 0)
-    assert_operator(pd.compare_priority("a", "A"), :==, 0)
-    assert_operator(pd.compare_priority("A", "a"), :==, 0)
-    assert_operator(pd.compare_priority("A", "A"), :==, 0)
-    assert_operator(pd.compare_priority("b", "a"), :>, 0)
-    assert_operator(pd.compare_priority("b", "A"), :>, 0)
-    assert_operator(pd.compare_priority("B", "a"), :>, 0)
-    assert_operator(pd.compare_priority("B", "A"), :>, 0)
-    pd = Depq.new(lambda {|a,b| [a[1],a[0]] <=> [b[1],b[0]]})
-    assert_operator(pd.compare_priority([0,0], [0,0]), :==, 0)
-    assert_operator(pd.compare_priority([0,0], [0,1]), :<, 0)
-    assert_operator(pd.compare_priority([0,0], [1,0]), :<, 0)
-    assert_operator(pd.compare_priority([0,0], [1,1]), :<, 0)
-    assert_operator(pd.compare_priority([0,1], [0,0]), :>, 0)
-    assert_operator(pd.compare_priority([0,1], [0,1]), :==, 0)
-    assert_operator(pd.compare_priority([0,1], [1,0]), :>, 0)
-    assert_operator(pd.compare_priority([0,1], [1,1]), :<, 0)
-    assert_operator(pd.compare_priority([1,0], [0,0]), :>, 0)
-    assert_operator(pd.compare_priority([1,0], [0,1]), :<, 0)
-    assert_operator(pd.compare_priority([1,0], [1,0]), :==, 0)
-    assert_operator(pd.compare_priority([1,0], [1,1]), :<, 0)
-    assert_operator(pd.compare_priority([1,1], [0,0]), :>, 0)
-    assert_operator(pd.compare_priority([1,1], [0,1]), :>, 0)
-    assert_operator(pd.compare_priority([1,1], [1,0]), :>, 0)
-    assert_operator(pd.compare_priority([1,1], [1,1]), :==, 0)
+    q = Depq.new
+    assert_operator(q.compare_priority("a", "b"), :<, 0)
+    assert_operator(q.compare_priority("a", "a"), :==, 0)
+    assert_operator(q.compare_priority("b", "a"), :>, 0)
+    q = Depq.new(:casecmp)
+    assert_operator(q.compare_priority("a", "b"), :<, 0)
+    assert_operator(q.compare_priority("a", "B"), :<, 0)
+    assert_operator(q.compare_priority("A", "b"), :<, 0)
+    assert_operator(q.compare_priority("A", "B"), :<, 0)
+    assert_operator(q.compare_priority("a", "a"), :==, 0)
+    assert_operator(q.compare_priority("a", "A"), :==, 0)
+    assert_operator(q.compare_priority("A", "a"), :==, 0)
+    assert_operator(q.compare_priority("A", "A"), :==, 0)
+    assert_operator(q.compare_priority("b", "a"), :>, 0)
+    assert_operator(q.compare_priority("b", "A"), :>, 0)
+    assert_operator(q.compare_priority("B", "a"), :>, 0)
+    assert_operator(q.compare_priority("B", "A"), :>, 0)
+    q = Depq.new(lambda {|a,b| [a[1],a[0]] <=> [b[1],b[0]]})
+    assert_operator(q.compare_priority([0,0], [0,0]), :==, 0)
+    assert_operator(q.compare_priority([0,0], [0,1]), :<, 0)
+    assert_operator(q.compare_priority([0,0], [1,0]), :<, 0)
+    assert_operator(q.compare_priority([0,0], [1,1]), :<, 0)
+    assert_operator(q.compare_priority([0,1], [0,0]), :>, 0)
+    assert_operator(q.compare_priority([0,1], [0,1]), :==, 0)
+    assert_operator(q.compare_priority([0,1], [1,0]), :>, 0)
+    assert_operator(q.compare_priority([0,1], [1,1]), :<, 0)
+    assert_operator(q.compare_priority([1,0], [0,0]), :>, 0)
+    assert_operator(q.compare_priority([1,0], [0,1]), :<, 0)
+    assert_operator(q.compare_priority([1,0], [1,0]), :==, 0)
+    assert_operator(q.compare_priority([1,0], [1,1]), :<, 0)
+    assert_operator(q.compare_priority([1,1], [0,0]), :>, 0)
+    assert_operator(q.compare_priority([1,1], [0,1]), :>, 0)
+    assert_operator(q.compare_priority([1,1], [1,0]), :>, 0)
+    assert_operator(q.compare_priority([1,1], [1,1]), :==, 0)
   end
 
   def test_empty?
-    pd = Depq.new
-    assert(pd.empty?)
-    pd.insert 1
-    assert(!pd.empty?)
+    q = Depq.new
+    assert(q.empty?)
+    q.insert 1
+    assert(!q.empty?)
   end
 
   def test_size
-    pd = Depq.new
-    pd.insert 1
-    assert_equal(1, pd.size)
-    pd.insert 10
-    assert_equal(2, pd.size)
-    pd.insert 2
-    assert_equal(3, pd.size)
-    pd.delete_max
-    assert_equal(2, pd.size)
+    q = Depq.new
+    q.insert 1
+    assert_equal(1, q.size)
+    q.insert 10
+    assert_equal(2, q.size)
+    q.insert 2
+    assert_equal(3, q.size)
+    q.delete_max
+    assert_equal(2, q.size)
   end
 
   def test_totalcount
-    pd = Depq.new
-    assert_equal(0, pd.totalcount)
-    pd.insert 1
-    assert_equal(1, pd.totalcount)
-    pd.insert 2
-    assert_equal(2, pd.totalcount)
-    pd.delete_min
-    assert_equal(2, pd.totalcount)
-    pd.insert 4
-    assert_equal(3, pd.totalcount)
-    pd.insert 3
-    assert_equal(4, pd.totalcount)
-    pd.insert 0
-    assert_equal(5, pd.totalcount)
-    pd.delete_min
-    assert_equal(5, pd.totalcount)
-    pd.insert 2
-    assert_equal(6, pd.totalcount)
+    q = Depq.new
+    assert_equal(0, q.totalcount)
+    q.insert 1
+    assert_equal(1, q.totalcount)
+    q.insert 2
+    assert_equal(2, q.totalcount)
+    q.delete_min
+    assert_equal(2, q.totalcount)
+    q.insert 4
+    assert_equal(3, q.totalcount)
+    q.insert 3
+    assert_equal(4, q.totalcount)
+    q.insert 0
+    assert_equal(5, q.totalcount)
+    q.delete_min
+    assert_equal(5, q.totalcount)
+    q.insert 2
+    assert_equal(6, q.totalcount)
   end
 
   def test_clear
-    pd = Depq.new
-    pd.insert 1
-    assert(!pd.empty?)
-    pd.clear
-    assert(pd.empty?)
+    q = Depq.new
+    q.insert 1
+    assert(!q.empty?)
+    q.clear
+    assert(q.empty?)
   end
 
   def test_insert
-    pd = Depq.new
-    pd.insert 1
-    pd.insert 10
-    pd.insert 2
-    assert_equal(1, pd.delete_min)
-    assert_equal(2, pd.delete_min)
-    assert_equal(10, pd.delete_min)
+    q = Depq.new
+    q.insert 1
+    q.insert 10
+    q.insert 2
+    assert_equal(1, q.delete_min)
+    assert_equal(2, q.delete_min)
+    assert_equal(10, q.delete_min)
   end
 
   def test_insert_all
-    pd = Depq.new
-    pd.insert_all [3,1,2]
-    assert_equal(1, pd.delete_min)
-    assert_equal(2, pd.delete_min)
-    assert_equal(3, pd.delete_min)
-    assert_equal(nil, pd.delete_min)
+    q = Depq.new
+    q.insert_all [3,1,2]
+    assert_equal(1, q.delete_min)
+    assert_equal(2, q.delete_min)
+    assert_equal(3, q.delete_min)
+    assert_equal(nil, q.delete_min)
   end
 
   def test_find_min_locator
-    pd = Depq.new
-    pd.insert 1
-    loc = pd.find_min_locator
+    q = Depq.new
+    q.insert 1
+    loc = q.find_min_locator
     assert_equal(1, loc.value)
     assert_equal(1, loc.priority)
-    assert_equal(pd, loc.pdeque)
-    assert_equal(1, pd.delete_min)
-    assert_equal(nil, loc.pdeque)
+    assert_equal(q, loc.depq)
+    assert_equal(1, q.delete_min)
+    assert_equal(nil, loc.depq)
   end
 
   def test_find_min
-    pd = Depq.new
-    pd.insert 1
-    assert_equal(1, pd.find_min)
+    q = Depq.new
+    q.insert 1
+    assert_equal(1, q.find_min)
   end
 
   def test_find_min_priority
-    pd = Depq.new
-    pd.insert "a", 1
-    assert_equal(["a", 1], pd.find_min_priority)
-    pd.delete_min
-    assert_equal(nil, pd.find_min_priority)
+    q = Depq.new
+    q.insert "a", 1
+    assert_equal(["a", 1], q.find_min_priority)
+    q.delete_min
+    assert_equal(nil, q.find_min_priority)
   end
 
   def test_find_max_locator
-    pd = Depq.new
-    pd.insert 1
-    loc = pd.find_max_locator
+    q = Depq.new
+    q.insert 1
+    loc = q.find_max_locator
     assert_equal(1, loc.value)
     assert_equal(1, loc.priority)
-    assert_equal(pd, loc.pdeque)
+    assert_equal(q, loc.depq)
   end
 
   def test_find_max
-    pd = Depq.new
-    pd.insert 1
-    assert_equal(1, pd.find_max)
+    q = Depq.new
+    q.insert 1
+    assert_equal(1, q.find_max)
   end
 
   def test_find_max_priority
-    pd = Depq.new
-    pd.insert "a", 1
-    assert_equal(["a", 1], pd.find_max_priority)
-    pd.delete_max
-    assert_equal(nil, pd.find_max_priority)
+    q = Depq.new
+    q.insert "a", 1
+    assert_equal(["a", 1], q.find_max_priority)
+    q.delete_max
+    assert_equal(nil, q.find_max_priority)
   end
 
   def test_find_minmax_locator
-    pd = Depq.new
-    assert_equal([nil, nil], pd.find_minmax_locator)
-    loc3 = pd.insert 3
-    loc1 = pd.insert 1
-    pd.insert 2
-    res = pd.find_minmax_locator
+    q = Depq.new
+    assert_equal([nil, nil], q.find_minmax_locator)
+    loc3 = q.insert 3
+    loc1 = q.insert 1
+    q.insert 2
+    res = q.find_minmax_locator
     assert_equal([loc1, loc3], res)
   end
 
   def test_find_minmax
-    pd = Depq.new
-    assert_equal([nil, nil], pd.find_minmax)
-    pd.insert 3
-    pd.insert 1
-    pd.insert 2
-    res = pd.find_minmax
+    q = Depq.new
+    assert_equal([nil, nil], q.find_minmax)
+    q.insert 3
+    q.insert 1
+    q.insert 2
+    res = q.find_minmax
     assert_equal([1, 3], res)
   end
 
   def test_find_minmax_after_min
-    pd = Depq.new
-    assert_equal([nil, nil], pd.find_minmax)
-    pd.insert 3
-    pd.insert 1
-    pd.insert 2
-    assert_equal(1, pd.min)
-    res = pd.find_minmax
+    q = Depq.new
+    assert_equal([nil, nil], q.find_minmax)
+    q.insert 3
+    q.insert 1
+    q.insert 2
+    assert_equal(1, q.min)
+    res = q.find_minmax
     assert_equal([1, 3], res)
   end
 
   def test_find_minmax_after_max
-    pd = Depq.new
-    assert_equal([nil, nil], pd.find_minmax)
-    pd.insert 3
-    pd.insert 1
-    pd.insert 2
-    assert_equal(3, pd.max)
-    res = pd.find_minmax
+    q = Depq.new
+    assert_equal([nil, nil], q.find_minmax)
+    q.insert 3
+    q.insert 1
+    q.insert 2
+    assert_equal(3, q.max)
+    res = q.find_minmax
     assert_equal([1, 3], res)
   end
 
   def test_delete_locator
-    pd = Depq.new
-    loc = pd.insert 1
-    pd.delete_locator loc
-    assert(pd.empty?)
-    pd = Depq.new
-    loc = pd.insert 2
-    pd.insert 3
-    pd.insert 1
-    assert_equal(1, pd.find_min)
-    pd.delete_locator(loc)
-    assert_equal(1, pd.delete_min)
-    assert_equal(3, pd.delete_min)
+    q = Depq.new
+    loc = q.insert 1
+    q.delete_locator loc
+    assert(q.empty?)
+    q = Depq.new
+    loc = q.insert 2
+    q.insert 3
+    q.insert 1
+    assert_equal(1, q.find_min)
+    q.delete_locator(loc)
+    assert_equal(1, q.delete_min)
+    assert_equal(3, q.delete_min)
   end
 
   def test_delete_min
-    pd = Depq.new
-    pd.insert 1
-    pd.insert 2
-    pd.insert 0
-    assert_equal(0, pd.delete_min)
-    assert_equal(1, pd.delete_min)
-    assert_equal(2, pd.delete_min)
-    assert_equal(nil, pd.delete_min)
+    q = Depq.new
+    q.insert 1
+    q.insert 2
+    q.insert 0
+    assert_equal(0, q.delete_min)
+    assert_equal(1, q.delete_min)
+    assert_equal(2, q.delete_min)
+    assert_equal(nil, q.delete_min)
   end
 
   def test_delete_min_locator
-    pd = Depq.new
-    loc1 = pd.insert 1
-    loc2 = pd.insert 2
-    loc0 = pd.insert 0
-    assert_equal(loc0, pd.delete_min_locator)
-    assert_equal(loc1, pd.delete_min_locator)
-    assert_equal(loc2, pd.delete_min_locator)
-    assert_equal(nil, pd.delete_min_locator)
+    q = Depq.new
+    loc1 = q.insert 1
+    loc2 = q.insert 2
+    loc0 = q.insert 0
+    assert_equal(loc0, q.delete_min_locator)
+    assert_equal(loc1, q.delete_min_locator)
+    assert_equal(loc2, q.delete_min_locator)
+    assert_equal(nil, q.delete_min_locator)
   end
 
   def test_delete_max
-    pd = Depq.new
-    pd.insert 1
-    pd.insert 2
-    pd.insert 0
-    assert_equal(2, pd.delete_max)
-    assert_equal(1, pd.delete_max)
-    assert_equal(0, pd.delete_max)
-    assert_equal(nil, pd.delete_max)
+    q = Depq.new
+    q.insert 1
+    q.insert 2
+    q.insert 0
+    assert_equal(2, q.delete_max)
+    assert_equal(1, q.delete_max)
+    assert_equal(0, q.delete_max)
+    assert_equal(nil, q.delete_max)
   end
 
   def test_delete_max_locator
-    pd = Depq.new
-    loc1 = pd.insert 1
-    loc2 = pd.insert 2
-    loc0 = pd.insert 0
-    assert_equal(loc2, pd.delete_max_locator)
-    assert_equal(loc1, pd.delete_max_locator)
-    assert_equal(loc0, pd.delete_max_locator)
-    assert_equal(nil, pd.delete_max)
+    q = Depq.new
+    loc1 = q.insert 1
+    loc2 = q.insert 2
+    loc0 = q.insert 0
+    assert_equal(loc2, q.delete_max_locator)
+    assert_equal(loc1, q.delete_max_locator)
+    assert_equal(loc0, q.delete_max_locator)
+    assert_equal(nil, q.delete_max)
   end
 
   def test_delete_unspecified
-    pd = Depq.new
+    q = Depq.new
     a1 = [1,2,0]
     a1.each {|v|
-      pd.insert v
+      q.insert v
     }
     a2 = []
     a1.length.times {
-      a2 << pd.delete_unspecified
+      a2 << q.delete_unspecified
     }
     assert_equal(a1.sort, a2.sort)
-    assert_equal(nil, pd.delete_unspecified_locator)
+    assert_equal(nil, q.delete_unspecified_locator)
   end
 
   def test_delete_unspecified_priority
-    pd = Depq.new
+    q = Depq.new
     a1 = [[1,8],[2,3],[0,5]]
     a1.each {|val, priority|
-      pd.insert val, priority
+      q.insert val, priority
     }
     a2 = []
     a1.length.times {
-      a2 << pd.delete_unspecified_priority
+      a2 << q.delete_unspecified_priority
     }
     assert_equal(a1.sort, a2.sort)
-    assert_equal(nil, pd.delete_unspecified_locator)
+    assert_equal(nil, q.delete_unspecified_locator)
   end
 
   def test_delete_unspecified_locator
-    pd = Depq.new
+    q = Depq.new
     a1 = [1,2,0]
     a1.each {|v|
-      pd.insert v
+      q.insert v
     }
     a2 = []
     a1.length.times {
-      a2 << pd.delete_unspecified_locator.value
+      a2 << q.delete_unspecified_locator.value
     }
     assert_equal(a1.sort, a2.sort)
-    assert_equal(nil, pd.delete_unspecified_locator)
+    assert_equal(nil, q.delete_unspecified_locator)
   end
 
   def test_each
-    pd = Depq.new
+    q = Depq.new
     a = [1,2,0]
     a.each {|v|
-      pd.insert v
+      q.insert v
     }
-    pd.each {|v|
+    q.each {|v|
       assert(a.include? v)
     }
   end
 
   def test_each_with_priority
-    pd = Depq.new
+    q = Depq.new
     h = {}
     h["durian"] = 1
     h["banana"] = 3
     h["melon"] = 2
     h.each {|val, prio|
-      pd.insert val, prio
+      q.insert val, prio
     }
-    pd.each_with_priority {|val, prio|
+    q.each_with_priority {|val, prio|
       assert_equal(h[val], prio)
     }
   end
 
   def test_each_locator
-    pd = Depq.new
+    q = Depq.new
     a = [1,2,0]
     a.each {|v|
-      pd.insert v
+      q.insert v
     }
-    pd.each_locator {|loc|
+    q.each_locator {|loc|
       assert(a.include? loc.value)
     }
   end

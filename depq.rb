@@ -44,18 +44,18 @@
 # delete_min deletes the minimum value.
 # It is used for ascending order.
 #
-#   pd = Depq.new
-#   pd.insert "durian"
-#   pd.insert "banana"
-#   p pd.delete_min     #=> "banana"
-#   pd.insert "orange"
-#   pd.insert "apple"
-#   pd.insert "melon"
-#   p pd.delete_min     #=> "apple"
-#   p pd.delete_min     #=> "durian"
-#   p pd.delete_min     #=> "melon"
-#   p pd.delete_min     #=> "orange"
-#   p pd.delete_min     #=> nil
+#   q = Depq.new
+#   q.insert "durian"
+#   q.insert "banana"
+#   p q.delete_min     #=> "banana"
+#   q.insert "orange"
+#   q.insert "apple"
+#   q.insert "melon"
+#   p q.delete_min     #=> "apple"
+#   p q.delete_min     #=> "durian"
+#   p q.delete_min     #=> "melon"
+#   p q.delete_min     #=> "orange"
+#   p q.delete_min     #=> nil
 #
 # delete_max is similar to delete_min except it deletes maximum element
 # instead of minimum.
@@ -66,14 +66,14 @@
 # The order is defined by the priorities corresnponds to the values and
 # comparison operator specified for the queue.
 #
-#   pd = Depq.new(:casecmp)   # use casecmp instead of <=>.
-#   pd.inesrt 1, "Foo"          # specify the priority for 1 as "Foo"
-#   pd.insert 2, "bar"
-#   pd.insert 3, "Baz"
-#   p pd.delete_min     #=> 2   # "bar" is minimum
-#   p pd.delete_min     #=> 3
-#   p pd.delete_min     #=> 1   # "Foo" is maximum
-#   p pd.delete_min     #=> nil
+#   q = Depq.new(:casecmp)   # use casecmp instead of <=>.
+#   q.inesrt 1, "Foo"          # specify the priority for 1 as "Foo"
+#   q.insert 2, "bar"
+#   q.insert 3, "Baz"
+#   p q.delete_min     #=> 2   # "bar" is minimum
+#   p q.delete_min     #=> 3
+#   p q.delete_min     #=> 1   # "Foo" is maximum
+#   p q.delete_min     #=> nil
 #
 # If there are multiple values with same priority, subpriority is used to compare them.
 # subpriority is an integer which can be specified by 3rd argument of insert.
@@ -81,19 +81,19 @@
 # So Depq is "stable" with delete_min.
 # The element inserted first is minimum and deleted first.
 #
-#   pd = Depq.new
-#   pd.insert "a", 1    # "a", "c" and "e" has same priority: 1
-#   pd.insert "b", 0    # "b", "d" and "f" has same priority: 0
-#   pd.insert "c", 1
-#   pd.insert "d", 0
-#   pd.insert "e", 1
-#   pd.insert "f", 0
-#   p pd.delete_min     #=> "b"         first element with priority 0
-#   p pd.delete_min     #=> "d"
-#   p pd.delete_min     #=> "f"         last element with priority 0
-#   p pd.delete_min     #=> "a"         first element with priority 1
-#   p pd.delete_min     #=> "c"
-#   p pd.delete_min     #=> "e"         last element with priority 1
+#   q = Depq.new
+#   q.insert "a", 1    # "a", "c" and "e" has same priority: 1
+#   q.insert "b", 0    # "b", "d" and "f" has same priority: 0
+#   q.insert "c", 1
+#   q.insert "d", 0
+#   q.insert "e", 1
+#   q.insert "f", 0
+#   p q.delete_min     #=> "b"         first element with priority 0
+#   p q.delete_min     #=> "d"
+#   p q.delete_min     #=> "f"         last element with priority 0
+#   p q.delete_min     #=> "a"         first element with priority 1
+#   p q.delete_min     #=> "c"
+#   p q.delete_min     #=> "e"         last element with priority 1
 #
 # Note that delete_max is also stable.
 # This means delete_max deletes the element with maximum priority with "minimum" subpriority.
@@ -104,22 +104,22 @@
 # This is done using Depq::Locator object.
 # It is returned by insert, find_min_locator, etc.
 #
-#   pd = Depq.new
-#   d = pd.insert "durian", 1
-#   m = pd.insert "mangosteen", 2
-#   c = pd.insert "cherry", 3
+#   q = Depq.new
+#   d = q.insert "durian", 1
+#   m = q.insert "mangosteen", 2
+#   c = q.insert "cherry", 3
 #   p m                         #=> #<Depq::Locator: "mangosteen":2>
 #   p m.value                   #=> "mangosteen"
 #   p m.priority                #=> 2
-#   p pd.find_min               #=> "durian"
-#   p pd.find_min_locator       #=> #<Depq::Locator: "durian":1>
+#   p q.find_min               #=> "durian"
+#   p q.find_min_locator       #=> #<Depq::Locator: "durian":1>
 #   m.update("mangosteen", 0)
-#   p pd.find_min               #=> "mangosteen"
-#   p pd.find_min_locator       #=> #<Depq::Locator: "mangosteen":0>
-#   pd.delete_element d
-#   p pd.delete_min             #=> "mangosteen"
-#   p pd.delete_min             #=> "cherry"
-#   p pd.delete_min             #=> nil
+#   p q.find_min               #=> "mangosteen"
+#   p q.find_min_locator       #=> #<Depq::Locator: "mangosteen":0>
+#   q.delete_element d
+#   p q.delete_min             #=> "mangosteen"
+#   p q.delete_min             #=> "cherry"
+#   p q.delete_min             #=> nil
 #
 # For example, this feature can be used for graph algorithms
 # such as Dijkstra's shortest path finding algorithm,
@@ -175,22 +175,22 @@
 class Depq
   include Enumerable
 
-  Locator = Struct.new(:value, :pdeque_or_subpriority, :index_or_priority)
+  Locator = Struct.new(:value, :depq_or_subpriority, :index_or_priority)
   class Locator
 
-    # if pdeque_or_subpriority is Depq
-    #   pdeque_or_subpriority is pdeque
+    # if depq_or_subpriority is Depq
+    #   depq_or_subpriority is depq
     #   index_or_priority is index
     # else
-    #   pdeque_or_subpriority is subpriority
+    #   depq_or_subpriority is subpriority
     #   index_or_priority is priority
     # end
     #
     # only 3 fields for memory efficiency.
 
     private :value=
-    private :pdeque_or_subpriority
-    private :pdeque_or_subpriority=
+    private :depq_or_subpriority
+    private :depq_or_subpriority=
     private :index_or_priority
     private :index_or_priority=
 
@@ -240,16 +240,16 @@ class Depq
 
     # returns true if the locator is in a queue.
     def in_queue?
-      pdeque_or_subpriority().kind_of? Depq
+      depq_or_subpriority().kind_of? Depq
     end
 
     # returns the queue.
     #
-    # nil is returned if the locator is not in a pdeque.
-    def pdeque
-      in_queue? ? pdeque_or_subpriority() : nil
+    # nil is returned if the locator is not in a depq.
+    def depq
+      in_queue? ? depq_or_subpriority() : nil
     end
-    alias queue pdeque
+    alias queue depq
 
     def index
       in_queue? ? index_or_priority() : nil
@@ -267,8 +267,8 @@ class Depq
     # returns the priority.
     def priority
       if in_queue?
-        pd = pdeque_or_subpriority()
-        priority, subpriority = pd.send(:internal_get_priority, self)
+        q = depq_or_subpriority()
+        priority, subpriority = q.send(:internal_get_priority, self)
         priority
       else
         index_or_priority()
@@ -278,11 +278,11 @@ class Depq
     # returns the subpriority.
     def subpriority
       if in_queue?
-        pd = pdeque_or_subpriority()
-        priority, subpriority = pd.send(:internal_get_priority, self)
+        q = depq_or_subpriority()
+        priority, subpriority = q.send(:internal_get_priority, self)
         subpriority
       else
-        pdeque_or_subpriority()
+        depq_or_subpriority()
       end
     end
 
@@ -292,8 +292,8 @@ class Depq
     # So subpriority is not changed if subpriority is not specified or nil for a locator in a queue.
     # subpriority is set to nil if subpriority is not specified or nil for a locator not in a queue.
     #
-    #   pd = Depq.new
-    #   loc1 = pd.insert 1, 2, 3
+    #   q = Depq.new
+    #   loc1 = q.insert 1, 2, 3
     #   p [loc1.value, loc1.priority, loc1.subpriority] #=> [1, 2, 3]
     #   loc1.update(11, 12)
     #   p [loc1.value, loc1.priority, loc1.subpriority] #=> [11, 12, 3]
@@ -308,16 +308,16 @@ class Depq
     def update(value, priority=value, subpriority=nil)
       subpriority = Integer(subpriority) if subpriority != nil
       if in_queue?
-        pd = pdeque_or_subpriority()
+        q = depq_or_subpriority()
         if subpriority == nil
           subpriority = self.subpriority
         else
           subpriority = Integer(subpriority)
         end
-        pd.send(:internal_set_priority, self, priority, subpriority)
+        q.send(:internal_set_priority, self, priority, subpriority)
       else
         self.index_or_priority = priority
-        self.pdeque_or_subpriority = subpriority
+        self.depq_or_subpriority = subpriority
       end
       self.value = value
       nil
@@ -327,8 +327,8 @@ class Depq
     #
     # This method doesn't change the priority and subpriority.
     #
-    #   pd = Depq.new
-    #   loc = pd.insert 1, 2, 3
+    #   q = Depq.new
+    #   loc = q.insert 1, 2, 3
     #   p [loc.value, loc.priority, loc.subpriority]    #=> [1, 2, 3]
     #   loc.update_value 10
     #   p [loc.value, loc.priority, loc.subpriority]    #=> [10, 2, 3]
@@ -341,8 +341,8 @@ class Depq
     #
     # This method doesn't change the value.
     #
-    #   pd = Depq.new
-    #   loc = pd.insert 1, 2, 3
+    #   q = Depq.new
+    #   loc = q.insert 1, 2, 3
     #   p [loc.value, loc.priority, loc.subpriority] #=> [1, 2, 3]
     #   loc.update_priority 10
     #   p [loc.value, loc.priority, loc.subpriority] #=> [1, 10, 3]
@@ -353,10 +353,10 @@ class Depq
       update(self.value, priority, subpriority)
     end
 
-    def internal_inserted(pdeque, index)
+    def internal_inserted(depq, index)
       raise ArgumentError, "already inserted" if in_queue?
       priority = index_or_priority()
-      self.pdeque_or_subpriority = pdeque
+      self.depq_or_subpriority = depq
       self.index_or_priority = index
       priority
     end
@@ -365,7 +365,7 @@ class Depq
     def internal_deleted(priority, subpriority)
       raise ArgumentError, "not inserted" if !in_queue?
       self.index_or_priority = priority
-      self.pdeque_or_subpriority = subpriority
+      self.depq_or_subpriority = subpriority
     end
     private :internal_deleted
 
@@ -377,23 +377,23 @@ class Depq
   # It should be a symbol or a Proc which takes two arguments.
   # If it is omitted, :<=> is used.
   #
-  #   pd = Depq.new
-  #   pd.insert "Foo"
-  #   pd.insert "bar"
-  #   p pd.delete_min   #=> "Foo"
-  #   p pd.delete_min   #=> "bar"
+  #   q = Depq.new
+  #   q.insert "Foo"
+  #   q.insert "bar"
+  #   p q.delete_min   #=> "Foo"
+  #   p q.delete_min   #=> "bar"
   #
-  #   pd = Depq.new(:casecmp)
-  #   pd.insert "Foo"
-  #   pd.insert "bar"
-  #   p pd.delete_min   #=> "bar"
-  #   p pd.delete_min   #=> "Foo"
+  #   q = Depq.new(:casecmp)
+  #   q.insert "Foo"
+  #   q.insert "bar"
+  #   p q.delete_min   #=> "bar"
+  #   p q.delete_min   #=> "Foo"
   #
-  #   pd = Depq.new(lambda {|a,b| a.casecmp(b) })
-  #   pd.insert "Foo"
-  #   pd.insert "bar"
-  #   p pd.delete_min   #=> "bar"
-  #   p pd.delete_min   #=> "Foo"
+  #   q = Depq.new(lambda {|a,b| a.casecmp(b) })
+  #   q.insert "Foo"
+  #   q.insert "bar"
+  #   p q.delete_min   #=> "bar"
+  #   p q.delete_min   #=> "Foo"
   #
   def initialize(cmp = :<=>)
     @cmp = cmp
@@ -486,7 +486,7 @@ class Depq
   private :mode_heapify
 
   def check_locator(loc)
-    if !self.equal?(loc.pdeque) ||
+    if !self.equal?(loc.depq) ||
        !get_entry(loc.send(:index))[0].equal?(loc)
       raise ArgumentError, "unexpected locator"
     end
@@ -557,10 +557,10 @@ class Depq
 
   # compare priority1 and priority2.
   #
-  #   pd = Depq.new
-  #   p pd.compare_priority("a", "b") #=> -1
-  #   p pd.compare_priority("a", "a") #=> 0
-  #   p pd.compare_priority("b", "a") #=> 1
+  #   q = Depq.new
+  #   p q.compare_priority("a", "b") #=> -1
+  #   p q.compare_priority("a", "a") #=> 0
+  #   p q.compare_priority("b", "a") #=> 1
   #
   def compare_priority(priority1, priority2)
     if @cmp.kind_of? Symbol
@@ -572,12 +572,12 @@ class Depq
 
   # returns true if the queue is empty.
   #
-  #   pd = Depq.new
-  #   p pd.empty?       #=> true
-  #   pd.insert 1
-  #   p pd.empty?       #=> false
-  #   pd.delete_max
-  #   p pd.empty?       #=> true
+  #   q = Depq.new
+  #   p q.empty?       #=> true
+  #   q.insert 1
+  #   p q.empty?       #=> false
+  #   q.delete_max
+  #   p q.empty?       #=> true
   #
   def empty?
     @ary.empty?
@@ -585,16 +585,16 @@ class Depq
 
   # returns the number of elements in the queue.
   #
-  #   pd = Depq.new
-  #   p pd.size         #=> 0
-  #   pd.insert 1
-  #   p pd.size         #=> 1
-  #   pd.insert 1
-  #   p pd.size         #=> 2
-  #   pd.delete_min
-  #   p pd.size         #=> 1
-  #   pd.delete_min
-  #   p pd.size         #=> 0
+  #   q = Depq.new
+  #   p q.size         #=> 0
+  #   q.insert 1
+  #   p q.size         #=> 1
+  #   q.insert 1
+  #   p q.size         #=> 2
+  #   q.delete_min
+  #   p q.size         #=> 1
+  #   q.delete_min
+  #   p q.size         #=> 0
   #
   def size
     @ary.size / ARY_SLICE_SIZE
@@ -605,24 +605,24 @@ class Depq
   #
   # The result is monotonically increased.
   #
-  #   pd = Depq.new
-  #   p [pd.size, pd.totalcount]        #=> [0, 0]
-  #   pd.insert 1
-  #   p [pd.size, pd.totalcount]        #=> [1, 1]
-  #   pd.insert 2
-  #   p [pd.size, pd.totalcount]        #=> [2, 2]
-  #   pd.delete_min
-  #   p [pd.size, pd.totalcount]        #=> [1, 2]
-  #   pd.insert 4
-  #   p [pd.size, pd.totalcount]        #=> [2, 3]
-  #   pd.insert 3
-  #   p [pd.size, pd.totalcount]        #=> [3, 4]
-  #   pd.insert 0
-  #   p [pd.size, pd.totalcount]        #=> [4, 5]
-  #   pd.delete_min
-  #   p [pd.size, pd.totalcount]        #=> [3, 5]
-  #   pd.insert 2
-  #   p [pd.size, pd.totalcount]        #=> [4, 6]
+  #   q = Depq.new
+  #   p [q.size, q.totalcount]        #=> [0, 0]
+  #   q.insert 1
+  #   p [q.size, q.totalcount]        #=> [1, 1]
+  #   q.insert 2
+  #   p [q.size, q.totalcount]        #=> [2, 2]
+  #   q.delete_min
+  #   p [q.size, q.totalcount]        #=> [1, 2]
+  #   q.insert 4
+  #   p [q.size, q.totalcount]        #=> [2, 3]
+  #   q.insert 3
+  #   p [q.size, q.totalcount]        #=> [3, 4]
+  #   q.insert 0
+  #   p [q.size, q.totalcount]        #=> [4, 5]
+  #   q.delete_min
+  #   p [q.size, q.totalcount]        #=> [3, 5]
+  #   q.insert 2
+  #   p [q.size, q.totalcount]        #=> [4, 6]
   #
   def totalcount
     @totalcount
@@ -632,15 +632,15 @@ class Depq
   #
   # Note that totalcount is not changed.
   #
-  #   pd = Depq.new
-  #   pd.insert 1
-  #   pd.insert 1
-  #   p pd.size         #=> 2
-  #   p pd.totalcount   #=> 2
-  #   pd.clear
-  #   p pd.size         #=> 0
-  #   p pd.totalcount   #=> 2
-  #   p pd.find_min     #=> nil
+  #   q = Depq.new
+  #   q.insert 1
+  #   q.insert 1
+  #   p q.size         #=> 2
+  #   p q.totalcount   #=> 2
+  #   q.clear
+  #   p q.size         #=> 0
+  #   p q.totalcount   #=> 2
+  #   p q.find_min     #=> nil
   #
   def clear
     @ary.clear
@@ -672,10 +672,10 @@ class Depq
   #
   # The locator should not already be inserted in a queue.
   #
-  #   pd = Depq.new
+  #   q = Depq.new
   #   loc = Depq::Locator.new(1)
-  #   pd.insert_locator loc
-  #   p pd.delete_min           #=> 1
+  #   q.insert_locator loc
+  #   p q.delete_min           #=> 1
   #
   def insert_locator(loc)
     subpriority = loc.subpriority || default_subpriority
@@ -692,36 +692,36 @@ class Depq
   #
   # If subpriority is omitted or nil, totalcount is used for stability.
   #
-  #   pd = Depq.new
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.delete_min   #=> 1
-  #   p pd.delete_min   #=> 2
-  #   p pd.delete_min   #=> 3
+  #   q = Depq.new
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.delete_min   #=> 1
+  #   p q.delete_min   #=> 2
+  #   p q.delete_min   #=> 3
   #
-  #   pd = Depq.new
-  #   pd.insert 3, 10
-  #   pd.insert 1, 20
-  #   pd.insert 2, 30
-  #   p pd.delete_min   #=> 3
-  #   p pd.delete_min   #=> 1
-  #   p pd.delete_min   #=> 2
+  #   q = Depq.new
+  #   q.insert 3, 10
+  #   q.insert 1, 20
+  #   q.insert 2, 30
+  #   p q.delete_min   #=> 3
+  #   p q.delete_min   #=> 1
+  #   p q.delete_min   #=> 2
   #
   # This method returns a locator which locates the inserted element.
   # It can be used to update the value and priority, or delete the element.
   #
-  #   pd = Depq.new
-  #   pd.insert 3
-  #   loc1 = pd.insert 1
-  #   loc2 = pd.insert 2
-  #   pd.insert 4
-  #   p pd.delete_max           #=> 4
-  #   pd.delete_locator loc1
+  #   q = Depq.new
+  #   q.insert 3
+  #   loc1 = q.insert 1
+  #   loc2 = q.insert 2
+  #   q.insert 4
+  #   p q.delete_max           #=> 4
+  #   q.delete_locator loc1
   #   loc2.update 8
-  #   p pd.delete_max           #=> 8
-  #   p pd.delete_max           #=> 3
-  #   p pd.delete_max           #=> nil
+  #   p q.delete_max           #=> 8
+  #   p q.delete_max           #=> 3
+  #   p q.delete_max           #=> nil
   #
   def insert(value, priority=value, subpriority=nil)
     loc = Locator.new(value, priority, subpriority)
@@ -739,12 +739,12 @@ class Depq
   #
   # This method returns nil.
   #
-  #   pd = Depq.new
-  #   pd.insert_all [3,1,2]
-  #   p pd.delete_min   #=> 1
-  #   p pd.delete_min   #=> 2
-  #   p pd.delete_min   #=> 3
-  #   p pd.delete_min   #=> nil
+  #   q = Depq.new
+  #   q.insert_all [3,1,2]
+  #   p q.delete_min   #=> 1
+  #   p q.delete_min   #=> 2
+  #   p q.delete_min   #=> 3
+  #   p q.delete_min   #=> nil
   #
   def insert_all(iter)
     iter.each {|v|
@@ -758,12 +758,12 @@ class Depq
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = Depq.new
-  #   p pd.find_min_locator     #=> nil
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.find_min_locator     #=> #<Depq::Locator: 1>
+  #   q = Depq.new
+  #   p q.find_min_locator     #=> nil
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.find_min_locator     #=> #<Depq::Locator: 1>
   #
   def find_min_locator
     return nil if empty?
@@ -776,14 +776,14 @@ class Depq
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = Depq.new
-  #   p pd.find_min_priority    #=> nil
-  #   pd.insert "durian", 1
-  #   pd.insert "banana", 3
-  #   pd.insert "melon", 2
-  #   p pd.find_min_priority    #=> ["durian", 1]
-  #   pd.clear
-  #   p pd.find_min_priority    #=> nil
+  #   q = Depq.new
+  #   p q.find_min_priority    #=> nil
+  #   q.insert "durian", 1
+  #   q.insert "banana", 3
+  #   q.insert "melon", 2
+  #   p q.find_min_priority    #=> ["durian", 1]
+  #   q.clear
+  #   p q.find_min_priority    #=> nil
   #
   def find_min_priority
     loc = find_min_locator and [loc.value, loc.priority]
@@ -794,12 +794,12 @@ class Depq
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = Depq.new
-  #   p pd.find_min     #=> nil
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.find_min     #=> 1
+  #   q = Depq.new
+  #   p q.find_min     #=> nil
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.find_min     #=> 1
   #
   def find_min
     loc = find_min_locator and loc.value
@@ -812,12 +812,12 @@ class Depq
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = Depq.new
-  #   p pd.find_max_locator     #=> nil
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.find_max_locator     #=> #<Depq::Locator: 3>
+  #   q = Depq.new
+  #   p q.find_max_locator     #=> nil
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.find_max_locator     #=> #<Depq::Locator: 3>
   #
   def find_max_locator
     return nil if empty?
@@ -830,14 +830,14 @@ class Depq
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = Depq.new
-  #   p pd.find_max_priority    #=> nil
-  #   pd.insert "durian", 1
-  #   pd.insert "banana", 3
-  #   pd.insert "melon", 2
-  #   p pd.find_max_priority    #=> ["banana", 3]
-  #   pd.clear
-  #   p pd.find_max_priority    #=> nil
+  #   q = Depq.new
+  #   p q.find_max_priority    #=> nil
+  #   q.insert "durian", 1
+  #   q.insert "banana", 3
+  #   q.insert "melon", 2
+  #   p q.find_max_priority    #=> ["banana", 3]
+  #   q.clear
+  #   p q.find_max_priority    #=> nil
   #
   def find_max_priority
     loc = find_max_locator and [loc.value, loc.priority]
@@ -848,12 +848,12 @@ class Depq
   #
   # This method doesn't delete the element from the queue.
   #
-  #   pd = Depq.new
-  #   p pd.find_max     #=> nil
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.find_max     #=> 3
+  #   q = Depq.new
+  #   p q.find_max     #=> nil
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.find_max     #=> 3
   #
   def find_max
     loc = find_max_locator and loc.value
@@ -864,12 +864,12 @@ class Depq
   # returns the locators for the minimum and maximum element as a two-element array.
   # If the queue is empty, [nil, nil] is returned.
   #
-  #   pd = Depq.new
-  #   p pd.find_minmax_locator #=> [nil, nil]
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.find_minmax_locator #=> [#<Depq::Locator: 1>, #<Depq::Locator: 3>]
+  #   q = Depq.new
+  #   p q.find_minmax_locator #=> [nil, nil]
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.find_minmax_locator #=> [#<Depq::Locator: 1>, #<Depq::Locator: 3>]
   #
   def find_minmax_locator
     return [nil, nil] if empty?
@@ -880,12 +880,12 @@ class Depq
   # returns the minimum and maximum value as a two-element array.
   # If the queue is empty, [nil, nil] is returned.
   #
-  #   pd = Depq.new
-  #   p pd.find_minmax  #=> [nil, nil]
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.find_minmax  #=> [1, 3]
+  #   q = Depq.new
+  #   p q.find_minmax  #=> [nil, nil]
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.find_minmax  #=> [1, 3]
   #
   def find_minmax
     loc1, loc2 = self.find_minmax_locator
@@ -895,14 +895,14 @@ class Depq
 
   # delete the element specified by the locator.
   #
-  #   pd = Depq.new
-  #   pd.insert 3
-  #   loc = pd.insert 2
-  #   pd.insert 1
-  #   pd.delete_locator loc
-  #   p pd.delete_min           #=> 1
-  #   p pd.delete_min           #=> 3
-  #   p pd.delete_min           #=> nil
+  #   q = Depq.new
+  #   q.insert 3
+  #   loc = q.insert 2
+  #   q.insert 1
+  #   q.delete_locator loc
+  #   p q.delete_min           #=> 1
+  #   p q.delete_min           #=> 3
+  #   p q.delete_min           #=> nil
   #
   def delete_locator(loc)
     check_locator(loc)
@@ -926,14 +926,14 @@ class Depq
   # This method returns the locator for the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = Depq.new
-  #   pd.insert 2
-  #   pd.insert 1
-  #   pd.insert 3
-  #   p pd.delete_min_locator   #=> #<Depq::Locator: 1 (no queue)>
-  #   p pd.delete_min_locator   #=> #<Depq::Locator: 2 (no queue)>
-  #   p pd.delete_min_locator   #=> #<Depq::Locator: 3 (no queue)>
-  #   p pd.delete_min_locator   #=> nil
+  #   q = Depq.new
+  #   q.insert 2
+  #   q.insert 1
+  #   q.insert 3
+  #   p q.delete_min_locator   #=> #<Depq::Locator: 1 (no queue)>
+  #   p q.delete_min_locator   #=> #<Depq::Locator: 2 (no queue)>
+  #   p q.delete_min_locator   #=> #<Depq::Locator: 3 (no queue)>
+  #   p q.delete_min_locator   #=> nil
   #
   def delete_min_locator
     return nil if empty?
@@ -949,14 +949,14 @@ class Depq
   # of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = Depq.new
-  #   pd.insert "durian", 1
-  #   pd.insert "banana", 3
-  #   pd.insert "melon", 2
-  #   p pd.delete_min_priority  #=> ["durian", 1]
-  #   p pd.delete_min_priority  #=> ["melon", 2]
-  #   p pd.delete_min_priority  #=> ["banana", 3]
-  #   p pd.delete_min_priority  #=> nil
+  #   q = Depq.new
+  #   q.insert "durian", 1
+  #   q.insert "banana", 3
+  #   q.insert "melon", 2
+  #   p q.delete_min_priority  #=> ["durian", 1]
+  #   p q.delete_min_priority  #=> ["melon", 2]
+  #   p q.delete_min_priority  #=> ["banana", 3]
+  #   p q.delete_min_priority  #=> nil
   #
   def delete_min_priority
     loc = delete_min_locator
@@ -969,14 +969,14 @@ class Depq
   # This method returns the value of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = Depq.new
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.delete_min   #=> 1
-  #   p pd.delete_min   #=> 2
-  #   p pd.delete_min   #=> 3
-  #   p pd.delete_min   #=> nil
+  #   q = Depq.new
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.delete_min   #=> 1
+  #   p q.delete_min   #=> 2
+  #   p q.delete_min   #=> 3
+  #   p q.delete_min   #=> nil
   #
   def delete_min
     loc = delete_min_locator
@@ -991,14 +991,14 @@ class Depq
   # This method returns the locator for the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = Depq.new
-  #   pd.insert 2
-  #   pd.insert 1
-  #   pd.insert 3
-  #   p pd.delete_max_locator   #=> #<Depq::Locator: 3 (no queue)>
-  #   p pd.delete_max_locator   #=> #<Depq::Locator: 2 (no queue)>
-  #   p pd.delete_max_locator   #=> #<Depq::Locator: 1 (no queue)>
-  #   p pd.delete_max_locator   #=> nil
+  #   q = Depq.new
+  #   q.insert 2
+  #   q.insert 1
+  #   q.insert 3
+  #   p q.delete_max_locator   #=> #<Depq::Locator: 3 (no queue)>
+  #   p q.delete_max_locator   #=> #<Depq::Locator: 2 (no queue)>
+  #   p q.delete_max_locator   #=> #<Depq::Locator: 1 (no queue)>
+  #   p q.delete_max_locator   #=> nil
   #
   def delete_max_locator
     return nil if empty?
@@ -1014,14 +1014,14 @@ class Depq
   # of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = Depq.new
-  #   pd.insert "durian", 1
-  #   pd.insert "banana", 3
-  #   pd.insert "melon", 2
-  #   p pd.delete_max_priority  #=> ["banana", 3]
-  #   p pd.delete_max_priority  #=> ["melon", 2]
-  #   p pd.delete_max_priority  #=> ["durian", 1]
-  #   p pd.delete_max_priority  #=> nil
+  #   q = Depq.new
+  #   q.insert "durian", 1
+  #   q.insert "banana", 3
+  #   q.insert "melon", 2
+  #   p q.delete_max_priority  #=> ["banana", 3]
+  #   p q.delete_max_priority  #=> ["melon", 2]
+  #   p q.delete_max_priority  #=> ["durian", 1]
+  #   p q.delete_max_priority  #=> nil
   #
   def delete_max_priority
     loc = delete_max_locator
@@ -1034,14 +1034,14 @@ class Depq
   # This method returns the value of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = Depq.new
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.delete_max   #=> 3
-  #   p pd.delete_max   #=> 2
-  #   p pd.delete_max   #=> 1
-  #   p pd.delete_max   #=> nil
+  #   q = Depq.new
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.delete_max   #=> 3
+  #   p q.delete_max   #=> 2
+  #   p q.delete_max   #=> 1
+  #   p q.delete_max   #=> nil
   #
   def delete_max
     loc = delete_max_locator
@@ -1055,14 +1055,14 @@ class Depq
   # This method returns the locator for the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = Depq.new
-  #   pd.insert 1
-  #   pd.insert 4
-  #   pd.insert 3
-  #   p pd.delete_unspecified_locator #=> #<Depq::Locator: 3 (no queue)>
-  #   p pd.delete_unspecified_locator #=> #<Depq::Locator: 4 (no queue)>
-  #   p pd.delete_unspecified_locator #=> #<Depq::Locator: 1 (no queue)>
-  #   p pd.delete_unspecified_locator #=> nil
+  #   q = Depq.new
+  #   q.insert 1
+  #   q.insert 4
+  #   q.insert 3
+  #   p q.delete_unspecified_locator #=> #<Depq::Locator: 3 (no queue)>
+  #   p q.delete_unspecified_locator #=> #<Depq::Locator: 4 (no queue)>
+  #   p q.delete_unspecified_locator #=> #<Depq::Locator: 1 (no queue)>
+  #   p q.delete_unspecified_locator #=> nil
   #
   def delete_unspecified_locator
     return nil if empty?
@@ -1077,14 +1077,14 @@ class Depq
   # of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = Depq.new
-  #   pd.insert "durian", 1
-  #   pd.insert "banana", 3
-  #   pd.insert "melon", 2
-  #   p pd.delete_unspecified_priority  #=> ["melon", 2]
-  #   p pd.delete_unspecified_priority  #=> ["banana", 3]
-  #   p pd.delete_unspecified_priority  #=> ["durian", 1]
-  #   p pd.delete_unspecified_priority  #=> nil
+  #   q = Depq.new
+  #   q.insert "durian", 1
+  #   q.insert "banana", 3
+  #   q.insert "melon", 2
+  #   p q.delete_unspecified_priority  #=> ["melon", 2]
+  #   p q.delete_unspecified_priority  #=> ["banana", 3]
+  #   p q.delete_unspecified_priority  #=> ["durian", 1]
+  #   p q.delete_unspecified_priority  #=> nil
   #
   def delete_unspecified_priority
     loc = delete_unspecified_locator
@@ -1098,14 +1098,14 @@ class Depq
   # This method returns the value of the deleted element.
   # nil is returned if the queue is empty.
   #
-  #   pd = Depq.new
-  #   pd.insert 1
-  #   pd.insert 4
-  #   pd.insert 3
-  #   p pd.delete_unspecified   #=> 3
-  #   p pd.delete_unspecified   #=> 4
-  #   p pd.delete_unspecified   #=> 1
-  #   p pd.delete_unspecified   #=> nil
+  #   q = Depq.new
+  #   q.insert 1
+  #   q.insert 4
+  #   q.insert 3
+  #   p q.delete_unspecified   #=> 3
+  #   p q.delete_unspecified   #=> 4
+  #   p q.delete_unspecified   #=> 1
+  #   p q.delete_unspecified   #=> nil
   #
   def delete_unspecified
     loc = delete_unspecified_locator
@@ -1117,12 +1117,12 @@ class Depq
   #
   # The iteration order is unspecified.
   #
-  #   pd = Depq.new
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.delete_min           #=> 1
-  #   pd.each_locator {|v|
+  #   q = Depq.new
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.delete_min           #=> 1
+  #   q.each_locator {|v|
   #     p v     #=> #<Depq::Locator: 2>, #<Depq::Locator: 3>
   #   }
   #
@@ -1135,11 +1135,11 @@ class Depq
 
   # iterate over the values and priorities in the queue.
   #
-  #   pd = Depq.new
-  #   pd.insert "durian", 1
-  #   pd.insert "banana", 3
-  #   pd.insert "melon", 2
-  #   pd.each_with_priority {|val, priority|
+  #   q = Depq.new
+  #   q.insert "durian", 1
+  #   q.insert "banana", 3
+  #   q.insert "melon", 2
+  #   q.each_with_priority {|val, priority|
   #     p [val, priority]
   #   }
   #   #=> ["durian", 1]
@@ -1157,12 +1157,12 @@ class Depq
   #
   # The iteration order is unspecified.
   #
-  #   pd = Depq.new
-  #   pd.insert 3
-  #   pd.insert 1
-  #   pd.insert 2
-  #   p pd.delete_min   #=> 1
-  #   pd.each {|v|
+  #   q = Depq.new
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.delete_min   #=> 1
+  #   q.each {|v|
   #     p v     #=> 2, 3
   #   }
   #
@@ -1182,32 +1182,32 @@ class Depq
   def Depq.nlargest(n, iter)
     limit = (n * Math.log(1+n)).ceil
     limit = 1024 if limit < 1024
-    pd = Depq.new
+    q = Depq.new
     threshold = nil
     iter.each {|v|
-      if pd.size < n
-        if pd.size == 0
+      if q.size < n
+        if q.size == 0
           threshold = v
         else
           threshold = v if (v <=> threshold) < 0
         end
-        pd.insert v
+        q.insert v
       else
         if (v <=> threshold) > 0
-          pd.insert v
-          if limit < pd.size
+          q.insert v
+          if limit < q.size
             tmp = []
-            n.times { tmp << pd.delete_max }
-            pd.clear
-            pd.insert_all tmp
+            n.times { tmp << q.delete_max }
+            q.clear
+            q.insert_all tmp
             threshold = tmp.last
           end
         end
       end
     }
-    n = pd.size if pd.size < n
+    n = q.size if q.size < n
     a = []
-    n.times { a << pd.delete_max }
+    n.times { a << q.delete_max }
     a.reverse!
     a
   end
@@ -1221,33 +1221,33 @@ class Depq
   def Depq.nsmallest(n, iter)
     limit = (n * Math.log(1+n)).ceil
     limit = 1024 if limit < 1024
-    pd = Depq.new
+    q = Depq.new
     threshold = nil
     iter.each {|v|
-      if pd.size < n
-        if pd.size == 0
+      if q.size < n
+        if q.size == 0
           threshold = v
         else
           threshold = v if (v <=> threshold) > 0
         end
-        pd.insert v
+        q.insert v
       else
         if (v <=> threshold) < 0
-          pd.insert v
-          if limit < pd.size
+          q.insert v
+          if limit < q.size
             tmp = []
-            n.times { tmp << pd.delete_min }
-            pd.clear
-            pd.insert_all tmp
+            n.times { tmp << q.delete_min }
+            q.clear
+            q.insert_all tmp
             threshold = tmp.last
           end
         end
       end
     }
-    n = pd.size if pd.size < n
+    n = q.size if q.size < n
     a = []
     n.times {
-      a << pd.delete_min
+      a << q.delete_min
     }
     a
   end
@@ -1268,7 +1268,7 @@ class Depq
   #   #   6
   #
   def Depq.merge(*iters, &b)
-    pd = Depq.new
+    q = Depq.new
     iters.each {|enum|
       enum = enum.to_enum unless enum.kind_of? Enumerator
       begin
@@ -1276,18 +1276,18 @@ class Depq
       rescue StopIteration
         next
       end
-      pd.insert enum, val
+      q.insert enum, val
     }
     loop = lambda {|y, meth|
-      until pd.empty?
-        loc = pd.find_min_locator
+      until q.empty?
+        loc = q.find_min_locator
         enum = loc.value
         val = loc.priority
         y.send meth, val
         begin
           val = enum.next
         rescue StopIteration
-          pd.delete_locator loc
+          q.delete_locator loc
           next
         end
         loc.update enum, val
@@ -1352,40 +1352,40 @@ class Depq
   module SimpleHeap
     include HeapArray
 
-    def upheap(pd, ary, j)
+    def upheap(q, ary, j)
       while true
         return if j <= 0
         i = (j-1) >> 1
-        return if upper?(pd, ary, i, j)
+        return if upper?(q, ary, i, j)
         swap(ary, j, i)
         j = i
       end
     end
 
-    def downheap(pd, ary, i)
+    def downheap(q, ary, i)
       while true
         j = i*2+1
         k = i*2+2
         return if size(ary) <= j
         if size(ary) == k
-          return if upper?(pd, ary, i, j)
+          return if upper?(q, ary, i, j)
           swap(ary, i, j)
           i = j
         else
-          return if upper?(pd, ary, i, j) && upper?(pd, ary, i, k)
-          loc = upper?(pd, ary, j, k) ? j : k
+          return if upper?(q, ary, i, j) && upper?(q, ary, i, k)
+          loc = upper?(q, ary, j, k) ? j : k
           swap(ary, i, loc)
           i = loc
         end
       end
     end
 
-    def find_top_locator(pd, ary)
+    def find_top_locator(q, ary)
       loc, _ = get_entry(ary, 0)
       loc
     end
 
-    def delete_locator(pd, ary, loc)
+    def delete_locator(q, ary, loc)
       i = loc.send(:index)
       _, priority, subpriority = get_entry(ary, i)
       last = size(ary) - 1
@@ -1394,12 +1394,12 @@ class Depq
       if i != last
         set_entry(ary, i, el, pl, sl)
         el.send(:index=, i)
-        downheap(pd, ary, i)
+        downheap(q, ary, i)
       end
       size(ary)
     end
 
-    def heapify(pd, ary, heapsize=0)
+    def heapify(q, ary, heapsize=0)
       # compare number of data movements in worst case.
       # choose a way for less data movements.
       #
@@ -1435,11 +1435,11 @@ class Depq
       if currentsize - 1 < (h - 1) * (currentsize - heapsize + 1)
         n = (currentsize - 2) / 2
         n.downto(0) {|i|
-          downheap(pd, ary, i)
+          downheap(q, ary, i)
         }
       else
         heapsize.upto(currentsize-1) {|i|
-          upheap(pd, ary, i)
+          upheap(q, ary, i)
         }
       end
       currentsize
@@ -1451,23 +1451,23 @@ class Depq
   class << MinHeap
     include SimpleHeap
 
-    def upper?(pd, ary, i, j)
+    def upper?(q, ary, i, j)
       ei, pi, si = get_entry(ary, i)
       ej, pj, sj = get_entry(ary, j)
-      pd.send(:compare_for_min, pi, si, pj, sj) <= 0
+      q.send(:compare_for_min, pi, si, pj, sj) <= 0
     end
 
-    def update_priority(pd, ary, loc, priority, subpriority)
+    def update_priority(q, ary, loc, priority, subpriority)
       i = loc.send(:index)
       ei, pi, si = get_entry(ary, i)
-      cmp = pd.send(:compare_for_min, pi, si, priority, subpriority)
+      cmp = q.send(:compare_for_min, pi, si, priority, subpriority)
       set_entry(ary, i, ei, priority, subpriority)
       if cmp < 0
         # loc.priority < priority
-        downheap(pd, ary, i)
+        downheap(q, ary, i)
       elsif cmp > 0
         # loc.priority > priority
-        upheap(pd, ary, i)
+        upheap(q, ary, i)
       end
     end
 
@@ -1479,24 +1479,24 @@ class Depq
   class << MaxHeap
     include SimpleHeap
 
-    def upper?(pd, ary, i, j)
+    def upper?(q, ary, i, j)
       ei, pi, si = get_entry(ary, i)
       ej, pj, sj = get_entry(ary, j)
-      pd.send(:compare_for_max, pi, si, pj, sj) >= 0
+      q.send(:compare_for_max, pi, si, pj, sj) >= 0
     end
 
-    def update_priority(pd, ary, loc, priority, subpriority)
+    def update_priority(q, ary, loc, priority, subpriority)
       i = loc.send(:index)
       ei, pi, si = get_entry(ary, i)
       subpriority ||= si
-      cmp = pd.send(:compare_for_max, pi, si, priority, subpriority)
+      cmp = q.send(:compare_for_max, pi, si, priority, subpriority)
       set_entry(ary, i, ei, priority, subpriority)
       if cmp < 0
         # loc.priority < priority
-        upheap(pd, ary, i)
+        upheap(q, ary, i)
       elsif cmp > 0
         # loc.priority > priority
-        downheap(pd, ary, i)
+        downheap(q, ary, i)
       end
     end
 
@@ -1520,23 +1520,23 @@ class Depq
     def child2_minside(i) i &= ~1; (i*2+4) & ~1 end
     def child2_maxside(i) i &= ~1; (i*2+4) | 1 end
 
-    def pcmp(pd, ary, i, j)
+    def pcmp(q, ary, i, j)
       ei, pi, si = get_entry(ary, i)
       ej, pj, sj = get_entry(ary, j)
-      pd.compare_priority(pi, pj)
+      q.compare_priority(pi, pj)
     end
 
-    def scmp(pd, ary, i, j)
+    def scmp(q, ary, i, j)
       ei, pi, si = get_entry(ary, i)
       ej, pj, sj = get_entry(ary, j)
       si <=> sj
     end
 
-    def psame(pd, ary, i)
-      pcmp(pd, ary, minside(i), maxside(i)) == 0
+    def psame(q, ary, i)
+      pcmp(q, ary, minside(i), maxside(i)) == 0
     end
 
-    def travel(pd, ary, i, range, fix_subpriority)
+    def travel(q, ary, i, range, fix_subpriority)
       while true
         j = yield i
         return i if !j
@@ -1545,7 +1545,7 @@ class Depq
           imin = minside(i)
           imax = maxside(i)
           if range.include?(imin) && range.include?(imax)
-            if pcmp(pd, ary, imin, imax) == 0 && scmp(pd, ary, imin, imax) > 0
+            if pcmp(q, ary, imin, imax) == 0 && scmp(q, ary, imin, imax) > 0
               swap ary, imin, imax
             end
           end
@@ -1554,15 +1554,15 @@ class Depq
       end
     end
 
-    def upheap_minside(pd, ary, i, range)
-      travel(pd, ary, i, range, true) {|j|
+    def upheap_minside(q, ary, i, range)
+      travel(q, ary, i, range, true) {|j|
         if root?(j)
           nil
         elsif !range.include?(k = parent_minside(j))
           nil
         else
-          if pcmp(pd, ary, k, j) > 0
-            swap(ary, minside(k), maxside(k)) if psame(pd, ary, k)
+          if pcmp(q, ary, k, j) > 0
+            swap(ary, minside(k), maxside(k)) if psame(q, ary, k)
             k
           else
             nil
@@ -1571,14 +1571,14 @@ class Depq
       }
     end
 
-    def upheap_maxside(pd, ary, i, range)
-      travel(pd, ary, i, range, true) {|j|
+    def upheap_maxside(q, ary, i, range)
+      travel(q, ary, i, range, true) {|j|
         if root?(j)
           nil
         elsif !range.include?(k = parent_maxside(j))
           nil
         else
-          if pcmp(pd, ary, k, j) < 0
+          if pcmp(q, ary, k, j) < 0
             k
           else
             nil
@@ -1587,8 +1587,8 @@ class Depq
       }
     end
 
-    def downheap_minside(pd, ary, i, range)
-      travel(pd, ary, i, range, true) {|j|
+    def downheap_minside(q, ary, i, range)
+      travel(q, ary, i, range, true) {|j|
         k1 = child1_minside(j)
         k2 = child2_minside(j)
         if !range.include?(k1)
@@ -1597,17 +1597,17 @@ class Depq
           if !range.include?(k2)
             k = k1
           else
-            if (pc = pcmp(pd, ary, k1, k2)) < 0
+            if (pc = pcmp(q, ary, k1, k2)) < 0
               k = k1
             elsif pc > 0
               k = k2
-            elsif (sc = scmp(pd, ary, k1, k2)) <= 0
+            elsif (sc = scmp(q, ary, k1, k2)) <= 0
               k = k1
             else
               k = k2
             end
           end
-          if (pc = pcmp(pd, ary, k, j)) < 0
+          if (pc = pcmp(q, ary, k, j)) < 0
             k
           else
             nil
@@ -1616,29 +1616,29 @@ class Depq
       }
     end
 
-    def downheap_maxside(pd, ary, i, range)
-      travel(pd, ary, i, range, true) {|j|
+    def downheap_maxside(q, ary, i, range)
+      travel(q, ary, i, range, true) {|j|
         k1 = child1_maxside(j)
         k2 = child2_maxside(j)
-        k1 = minside(k1) if range.include?(k1) && psame(pd, ary, k1)
-        k2 = minside(k2) if range.include?(k2) && psame(pd, ary, k2)
+        k1 = minside(k1) if range.include?(k1) && psame(q, ary, k1)
+        k2 = minside(k2) if range.include?(k2) && psame(q, ary, k2)
         if !range.include?(k1)
           nil
         else
           if !range.include?(k2)
             k = k1
           else
-            if (pc = pcmp(pd, ary, k1, k2)) < 0
+            if (pc = pcmp(q, ary, k1, k2)) < 0
               k = k2
             elsif pc > 0
               k = k1
-            elsif (sc = scmp(pd, ary, k1, k2)) <= 0
+            elsif (sc = scmp(q, ary, k1, k2)) <= 0
               k = k1
             else
               k = k2
             end
           end
-          if (pc = pcmp(pd, ary, k, j)) > 0
+          if (pc = pcmp(q, ary, k, j)) > 0
             swap(ary, minside(k), maxside(k)) if minside?(k)
             maxside(k)
           else
@@ -1648,19 +1648,19 @@ class Depq
       }
     end
 
-    def upheap_sub(pd, ary, i, range)
-      travel(pd, ary, i, range, false) {|j|
+    def upheap_sub(q, ary, i, range)
+      travel(q, ary, i, range, false) {|j|
         k = nil
         if minside?(j)
-          if range.include?(kk=parent_maxside(j)) && pcmp(pd, ary, j, kk) == 0
+          if range.include?(kk=parent_maxside(j)) && pcmp(q, ary, j, kk) == 0
             k = kk
-          elsif range.include?(kk=parent_minside(j)) && pcmp(pd, ary, j, kk) == 0
+          elsif range.include?(kk=parent_minside(j)) && pcmp(q, ary, j, kk) == 0
             k = kk
           end
         else
-          if range.include?(kk=minside(j)) && pcmp(pd, ary, j, kk) == 0
+          if range.include?(kk=minside(j)) && pcmp(q, ary, j, kk) == 0
             k = kk
-          elsif range.include?(kk=parent_maxside(j)) && pcmp(pd, ary, j, kk) == 0
+          elsif range.include?(kk=parent_maxside(j)) && pcmp(q, ary, j, kk) == 0
             k = kk
           end
         end
@@ -1668,7 +1668,7 @@ class Depq
           nil
         elsif !range.include?(k)
           nil
-        elsif scmp(pd, ary, k, j) > 0
+        elsif scmp(q, ary, k, j) > 0
           k
         else
           nil
@@ -1676,34 +1676,34 @@ class Depq
       }
     end
 
-    def downheap_sub(pd, ary, i, range)
-      travel(pd, ary, i, range, false) {|j|
+    def downheap_sub(q, ary, i, range)
+      travel(q, ary, i, range, false) {|j|
         k1 = k2 = nil
         if minside?(j)
-          if range.include?(kk=maxside(j)) && pcmp(pd, ary, j, kk) == 0
+          if range.include?(kk=maxside(j)) && pcmp(q, ary, j, kk) == 0
             k1 = kk
           else
-            k1 = kk if range.include?(kk=child1_minside(j)) && pcmp(pd, ary, j, kk) == 0
-            k2 = kk if range.include?(kk=child2_minside(j)) && pcmp(pd, ary, j, kk) == 0
+            k1 = kk if range.include?(kk=child1_minside(j)) && pcmp(q, ary, j, kk) == 0
+            k2 = kk if range.include?(kk=child2_minside(j)) && pcmp(q, ary, j, kk) == 0
           end
         else
-          if range.include?(kk=child1_minside(j)) && pcmp(pd, ary, j, kk) == 0
+          if range.include?(kk=child1_minside(j)) && pcmp(q, ary, j, kk) == 0
             k1 = kk
-          elsif range.include?(kk=child1_maxside(j)) && pcmp(pd, ary, j, kk) == 0
+          elsif range.include?(kk=child1_maxside(j)) && pcmp(q, ary, j, kk) == 0
             k1 = kk
           end
-          if range.include?(kk=child2_minside(j)) && pcmp(pd, ary, j, kk) == 0
+          if range.include?(kk=child2_minside(j)) && pcmp(q, ary, j, kk) == 0
             k2 = kk
-          elsif range.include?(kk=child2_maxside(j)) && pcmp(pd, ary, j, kk) == 0
+          elsif range.include?(kk=child2_maxside(j)) && pcmp(q, ary, j, kk) == 0
             k2 = kk
           end
         end
         if k1 && k2
-          k = scmp(pd, ary, k1, k2) > 0 ? k2 : k1
+          k = scmp(q, ary, k1, k2) > 0 ? k2 : k1
         else
           k = k1 || k2
         end
-        if k && scmp(pd, ary, k, j) < 0
+        if k && scmp(q, ary, k, j) < 0
           k
         else
           nil
@@ -1711,73 +1711,73 @@ class Depq
       }
     end
 
-    def adjust(pd, ary, i, range)
+    def adjust(q, ary, i, range)
       if minside?(i)
-        j = upheap_minside(pd, ary, i, range)
+        j = upheap_minside(q, ary, i, range)
         if i == j
-          i = downheap_minside(pd, ary, i, range)
-          if !range.include?(child1_minside(i)) && range.include?(j=maxside(i)) && pcmp(pd, ary, i, j) > 0
+          i = downheap_minside(q, ary, i, range)
+          if !range.include?(child1_minside(i)) && range.include?(j=maxside(i)) && pcmp(q, ary, i, j) > 0
             swap(ary, i, j)
             i = j
           end
           if maxside?(i) || !range.include?(maxside(i))
-            i = upheap_maxside(pd, ary, i, range)
+            i = upheap_maxside(q, ary, i, range)
           end
         end
       else
-        j = upheap_maxside(pd, ary, i, range)
+        j = upheap_maxside(q, ary, i, range)
         if i == j
-          i = downheap_maxside(pd, ary, i, range)
+          i = downheap_maxside(q, ary, i, range)
           if !range.include?(child1_maxside(i))
-            if range.include?(j=child1_minside(i)) && pcmp(pd, ary, j, i) > 0
+            if range.include?(j=child1_minside(i)) && pcmp(q, ary, j, i) > 0
               swap(ary, i, j)
               i = j
-            elsif range.include?(j=minside(i)) && pcmp(pd, ary, j, i) > 0
+            elsif range.include?(j=minside(i)) && pcmp(q, ary, j, i) > 0
               swap(ary, i, j)
               i = j
             end
           end
           if minside?(i)
-            i = upheap_minside(pd, ary, i, range)
+            i = upheap_minside(q, ary, i, range)
           end
         end
       end
-      i = upheap_sub(pd, ary, i, range)
-      downheap_sub(pd, ary, i, range)
+      i = upheap_sub(q, ary, i, range)
+      downheap_sub(q, ary, i, range)
     end
 
-    def update_priority(pd, ary, loc, prio, subprio)
+    def update_priority(q, ary, loc, prio, subprio)
       i = loc.send(:index)
       ei, pi, si = get_entry(ary, i)
       subpriority ||= si
       set_entry(ary, i, ei, prio, subprio)
       range = 0...size(ary)
-      adjust(pd, ary, i, range)
+      adjust(q, ary, i, range)
     end
 
-    def insert_internal(pd, ary, loc, prio, subprio)
+    def insert_internal(q, ary, loc, prio, subprio)
       i = size(ary)
       set_entry(ary, i, loc, prio, subprio)
       range = 0...size(ary)
-      adjust(pd, ary, i, range)
+      adjust(q, ary, i, range)
     end
 
-    def heapify(pd, ary, heapsize=0)
+    def heapify(q, ary, heapsize=0)
       currentsize = size(ary)
       h = Math.log(currentsize+1)/Math.log(2)
       if currentsize - 1 < (h - 1) * (currentsize - heapsize + 1)
         (currentsize-1).downto(0) {|i|
-          adjust(pd, ary, i, i...currentsize)
+          adjust(q, ary, i, i...currentsize)
         }
       else
         heapsize.upto(currentsize-1) {|i|
-          adjust(pd, ary, i, 0...(i+1))
+          adjust(q, ary, i, 0...(i+1))
         }
       end
       currentsize
     end
 
-    def find_minmax_locator(pd, ary)
+    def find_minmax_locator(q, ary)
       case size(ary)
       when 0
         [nil, nil]
@@ -1785,7 +1785,7 @@ class Depq
         e0, p0, s0 = get_entry(ary, 0)
         [e0, e0]
       else
-        if pcmp(pd, ary, 0, 1) == 0
+        if pcmp(q, ary, 0, 1) == 0
           e0, p0, s0 = get_entry(ary, 0)
           [e0, e0]
         else
@@ -1796,15 +1796,15 @@ class Depq
       end
     end
 
-    def find_min_locator(pd, ary)
-      find_minmax_locator(pd, ary).first
+    def find_min_locator(q, ary)
+      find_minmax_locator(q, ary).first
     end
 
-    def find_max_locator(pd, ary)
-      find_minmax_locator(pd, ary).last
+    def find_max_locator(q, ary)
+      find_minmax_locator(q, ary).last
     end
 
-    def delete_locator(pd, ary, loc)
+    def delete_locator(q, ary, loc)
       i = loc.send(:index)
       _, priority, subpriority = get_entry(ary, i)
       last = size(ary) - 1
@@ -1813,7 +1813,7 @@ class Depq
       if i != last
         set_entry(ary, i, el, pl, sl)
         el.send(:index=, i)
-        adjust(pd, ary, i, 0...last)
+        adjust(q, ary, i, 0...last)
       end
       size(ary)
     end

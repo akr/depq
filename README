@@ -28,18 +28,18 @@ You can deletes the values from the object from ascending/descending order.
 delete_min deletes the minimum value.
 It is used for ascending order.
 
-  pd = Depq.new
-  pd.insert "durian"
-  pd.insert "banana"
-  p pd.delete_min     #=> "banana"
-  pd.insert "orange"
-  pd.insert "apple"
-  pd.insert "melon"
-  p pd.delete_min     #=> "apple"
-  p pd.delete_min     #=> "durian"
-  p pd.delete_min     #=> "melon"
-  p pd.delete_min     #=> "orange"
-  p pd.delete_min     #=> nil
+  q = Depq.new
+  q.insert "durian"
+  q.insert "banana"
+  p q.delete_min     #=> "banana"
+  q.insert "orange"
+  q.insert "apple"
+  q.insert "melon"
+  p q.delete_min     #=> "apple"
+  p q.delete_min     #=> "durian"
+  p q.delete_min     #=> "melon"
+  p q.delete_min     #=> "orange"
+  p q.delete_min     #=> nil
 
 delete_max is similar to delete_min except it deletes maximum element
 instead of minimum.
@@ -50,14 +50,14 @@ It is used for descending order.
 The order is defined by the priorities corresponds to the values and
 comparison operator specified for the queue.
 
-  pd = Depq.new(:casecmp)   # use casecmp instead of <=>.
-  pd.insert 1, "Foo"          # specify the priority for 1 as "Foo"
-  pd.insert 2, "bar"
-  pd.insert 3, "Baz"
-  p pd.delete_min     #=> 2   # "bar" is minimum
-  p pd.delete_min     #=> 3
-  p pd.delete_min     #=> 1   # "Foo" is maximum
-  p pd.delete_min     #=> nil
+  q = Depq.new(:casecmp)   # use casecmp instead of <=>.
+  q.insert 1, "Foo"          # specify the priority for 1 as "Foo"
+  q.insert 2, "bar"
+  q.insert 3, "Baz"
+  p q.delete_min     #=> 2   # "bar" is minimum
+  p q.delete_min     #=> 3
+  p q.delete_min     #=> 1   # "Foo" is maximum
+  p q.delete_min     #=> nil
 
 If there are multiple values with same priority, subpriority is used to compare them.
 subpriority is an integer which can be specified by 3rd argument of insert.
@@ -65,19 +65,19 @@ If it is not specified, total number of inserted elements is used.
 So Depq is "stable" with delete_min.
 The element inserted first is minimum and deleted first.
 
-  pd = Depq.new
-  pd.insert "a", 1    # "a", "c" and "e" has same priority: 1
-  pd.insert "b", 0    # "b", "d" and "f" has same priority: 0
-  pd.insert "c", 1
-  pd.insert "d", 0
-  pd.insert "e", 1
-  pd.insert "f", 0
-  p pd.delete_min     #=> "b"         first element with priority 0
-  p pd.delete_min     #=> "d"
-  p pd.delete_min     #=> "f"         last element with priority 0
-  p pd.delete_min     #=> "a"         first element with priority 1
-  p pd.delete_min     #=> "c"
-  p pd.delete_min     #=> "e"         last element with priority 1
+  q = Depq.new
+  q.insert "a", 1    # "a", "c" and "e" has same priority: 1
+  q.insert "b", 0    # "b", "d" and "f" has same priority: 0
+  q.insert "c", 1
+  q.insert "d", 0
+  q.insert "e", 1
+  q.insert "f", 0
+  p q.delete_min     #=> "b"         first element with priority 0
+  p q.delete_min     #=> "d"
+  p q.delete_min     #=> "f"         last element with priority 0
+  p q.delete_min     #=> "a"         first element with priority 1
+  p q.delete_min     #=> "c"
+  p q.delete_min     #=> "e"         last element with priority 1
 
 Note that delete_max is also stable.
 This means delete_max deletes the element with maximum priority with "minimum" subpriority.
@@ -88,22 +88,22 @@ An inserted element can be modified and/or deleted.
 This is done using Depq::Locator object.
 It is returned by insert, find_min_locator, etc.
 
-  pd = Depq.new
-  d = pd.insert "durian", 1
-  m = pd.insert "mangosteen", 2
-  c = pd.insert "cherry", 3
+  q = Depq.new
+  d = q.insert "durian", 1
+  m = q.insert "mangosteen", 2
+  c = q.insert "cherry", 3
   p m                         #=> #<Depq::Locator: "mangosteen":2>
   p m.value                   #=> "mangosteen"
   p m.priority                #=> 2
-  p pd.find_min               #=> "durian"
-  p pd.find_min_locator       #=> #<Depq::Locator: "durian":1>
+  p q.find_min               #=> "durian"
+  p q.find_min_locator       #=> #<Depq::Locator: "durian":1>
   m.update("mangosteen", 0)
-  p pd.find_min               #=> "mangosteen"
-  p pd.find_min_locator       #=> #<Depq::Locator: "mangosteen":0>
-  pd.delete_element d
-  p pd.delete_min             #=> "mangosteen"
-  p pd.delete_min             #=> "cherry"
-  p pd.delete_min             #=> nil
+  p q.find_min               #=> "mangosteen"
+  p q.find_min_locator       #=> #<Depq::Locator: "mangosteen":0>
+  q.delete_element d
+  p q.delete_min             #=> "mangosteen"
+  p q.delete_min             #=> "cherry"
+  p q.delete_min             #=> nil
 
 For example, this feature can be used for graph algorithms
 such as Dijkstra's shortest path finding algorithm,
