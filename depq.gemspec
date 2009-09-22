@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name = 'depq'
-  s.version = '0.1'
-  s.date = '2009-09-20'
+  s.version = '0.2'
+  s.date = '2009-09-23'
   s.author = 'Tanaka Akira'
   s.email = 'akr@fsij.org'
   s.files = %w[README depq.rb]
