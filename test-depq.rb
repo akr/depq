@@ -46,6 +46,30 @@ class Depq
     end
   end
 
+  def IntervalHeap.validation(pd, ary)
+    range=0...size(ary)
+    range.each {|j|
+      imin = parent_minside(j)
+      imax = parent_maxside(j)
+      jmin = minside(j)
+      if minside?(j) && range.include?(imin) && pcmp(pd, ary, imin, j) > 0
+        raise "ary[#{imin}].priority > ary[#{j}].priority "
+      end
+      if maxside?(j) && range.include?(imax) && pcmp(pd, ary, imax, j) < 0
+        raise "ary[#{imax}].priority < ary[#{j}].priority "
+      end
+      if range.include?(imin) && pcmp(pd, ary, imin, j) == 0 && scmp(pd, ary, imin, j) > 0
+        raise "ary[#{imin}].subpriority < ary[#{j}].subpriority "
+      end
+      if range.include?(imax) && pcmp(pd, ary, imax, j) == 0 && scmp(pd, ary, imax, j) > 0
+        raise "ary[#{imax}].subpriority < ary[#{j}].subpriority "
+      end
+      if maxside?(j) && range.include?(jmin) && pcmp(pd, ary, jmin, j) == 0 && scmp(pd, ary, jmin, j) > 0
+        raise "ary[#{jmin}].subpriority < ary[#{j}].subpriority "
+      end
+    }
+  end
+
   def validation
     @mode.validation(self, @ary) if @mode
     if @ary.length % ARY_SLICE_SIZE != 0
