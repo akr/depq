@@ -48,11 +48,11 @@ It is used for descending order.
 
 == The Order
 
-The order is defined by the priorities corresnponds to the values and
+The order is defined by the priorities corresponds to the values and
 comparison operator specified for the queue.
 
   pd = Depq.new(:casecmp)   # use casecmp instead of <=>.
-  pd.inesrt 1, "Foo"          # specify the priority for 1 as "Foo"
+  pd.insert 1, "Foo"          # specify the priority for 1 as "Foo"
   pd.insert 2, "bar"
   pd.insert 3, "Baz"
   p pd.delete_min     #=> 2   # "bar" is minimum
