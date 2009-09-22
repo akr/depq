@@ -1320,8 +1320,7 @@ class Depq
 
   # :stopdoc:
 
-  module SimpleHeap
-
+  module HeapArray
     def size(ary)
       return ary.size / ARY_SLICE_SIZE
     end
@@ -1364,6 +1363,10 @@ class Depq
       ei.send(:index=, j)
       ej.send(:index=, i)
     end
+  end
+
+  module SimpleHeap
+    include HeapArray
 
     def upheap(pd, ary, j)
       while true
