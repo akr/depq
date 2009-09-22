@@ -1,6 +1,5 @@
 = Depq - Feature Rich Double-Ended Priority Queue.
 
-((<URL:http://depq.rubyforge.org/>))
 
 = Features
 
@@ -14,6 +13,12 @@
 = Install
 
   gem install depq
+
+= Development
+
+* ((<home page on rubyforge|URL:http://depq.rubyforge.org/>))
+* ((<project info on rubyforge|URL:http://rubyforge.org/projects/depq/>))
+* ((<source repository on github|URL:http://github.com/akr/depq>))
 
 = Introduction
 
