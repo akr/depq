@@ -1330,15 +1330,6 @@ class Depq
       [locator, priority, subpriority]
     end
 
-    def each_entry(ary)
-      0.upto(self.size-1) {|i|
-        ei = ary[i*ARY_SLICE_SIZE+0]
-        pi = ary[i*ARY_SLICE_SIZE+1]
-        si = ary[i*ARY_SLICE_SIZE+2]
-        yield ei, pi, si
-      }
-    end
-
     def swap(ary, i, j)
       ei, pi, si = get_entry(ary, i)
       ej, pj, sj = get_entry(ary, j)
@@ -1666,8 +1657,6 @@ class Depq
         end
         if !k
           nil
-        elsif !range.include?(k)
-          nil
         elsif scmp(q, ary, k, j) > 0
           k
         else
@@ -1751,13 +1740,6 @@ class Depq
       ei, pi, si = get_entry(ary, i)
       subpriority ||= si
       set_entry(ary, i, ei, prio, subprio)
-      range = 0...size(ary)
-      adjust(q, ary, i, range)
-    end
-
-    def insert_internal(q, ary, loc, prio, subprio)
-      i = size(ary)
-      set_entry(ary, i, loc, prio, subprio)
       range = 0...size(ary)
       adjust(q, ary, i, range)
     end

@@ -222,6 +222,11 @@ class TestDepq < Test::Unit::TestCase
     assert_equal(loc2, q.delete_min_locator)
   end
 
+  def test_locator_dup
+    loc = Depq::Locator.new(1)
+    assert_raise(TypeError) { loc.dup }
+  end
+
   def test_locator_eql
     loc1 = Depq::Locator.new(1,2,3)
     loc2 = Depq::Locator.new(1,2,3)
@@ -353,6 +358,17 @@ class TestDepq < Test::Unit::TestCase
     assert_equal(1, loc.value)
     assert_equal(50, loc.priority)
     assert_equal(nil, loc.subpriority)
+  end
+
+  def test_locator_minmax_update_priority
+    q = Depq.new
+    loc = q.insert 1, 2, 3
+    q.insert 4, 5, 6
+    q.insert 2, 3, 4
+    q.insert 3, 4, 5
+    assert_equal([1, 4], q.minmax)
+    loc.update 7, 8, 9
+    assert_equal([2, 7], q.minmax)
   end
 
   def test_locator_subpriority
@@ -588,10 +604,19 @@ class TestDepq < Test::Unit::TestCase
     q = Depq.new
     assert_equal([nil, nil], q.find_minmax_locator)
     loc3 = q.insert 3
+    assert_equal([loc3, loc3], q.find_minmax_locator)
     loc1 = q.insert 1
     q.insert 2
     res = q.find_minmax_locator
     assert_equal([loc1, loc3], res)
+  end
+
+  def test_find_minmax_locator2
+    q = Depq.new
+    loc1 = q.insert 10
+    assert_equal([loc1, loc1], q.find_minmax_locator)
+    loc2 = q.insert 10
+    assert_equal([loc1, loc1], q.find_minmax_locator)
   end
 
   def test_find_minmax
@@ -641,6 +666,13 @@ class TestDepq < Test::Unit::TestCase
     assert_equal(3, q.delete_min)
   end
 
+  def test_delete_locator_err
+    q = Depq.new
+    loc = q.insert 1
+    q2 = Depq.new
+    assert_raise(ArgumentError) { q2.delete_locator(loc) }
+  end
+
   def test_delete_min
     q = Depq.new
     q.insert 1
@@ -650,6 +682,17 @@ class TestDepq < Test::Unit::TestCase
     assert_equal(1, q.delete_min)
     assert_equal(2, q.delete_min)
     assert_equal(nil, q.delete_min)
+  end
+
+  def test_delete_min_priority
+    q = Depq.new
+    q.insert "apple", 1
+    q.insert "durian", 2
+    q.insert "banana", 0
+    assert_equal(["banana", 0], q.delete_min_priority)
+    assert_equal(["apple", 1], q.delete_min_priority)
+    assert_equal(["durian", 2], q.delete_min_priority)
+    assert_equal(nil, q.delete_min_priority)
   end
 
   def test_delete_min_locator
@@ -674,6 +717,17 @@ class TestDepq < Test::Unit::TestCase
     assert_equal(nil, q.delete_max)
   end
 
+  def test_delete_max_priority
+    q = Depq.new
+    q.insert "apple", 1
+    q.insert "durian", 2
+    q.insert "banana", 0
+    assert_equal(["durian", 2], q.delete_max_priority)
+    assert_equal(["apple", 1], q.delete_max_priority)
+    assert_equal(["banana", 0], q.delete_max_priority)
+    assert_equal(nil, q.delete_max)
+  end
+
   def test_delete_max_locator
     q = Depq.new
     loc1 = q.insert 1
@@ -683,6 +737,170 @@ class TestDepq < Test::Unit::TestCase
     assert_equal(loc1, q.delete_max_locator)
     assert_equal(loc0, q.delete_max_locator)
     assert_equal(nil, q.delete_max)
+  end
+
+  def test_delete_max_after_insert
+    q = Depq.new
+    q.insert 1
+    q.insert 2
+    q.insert 0
+    assert_equal(2, q.delete_max)
+    q.insert 3
+    assert_equal(3, q.delete_max)
+  end
+
+  def test_minmax_after_insert
+    q = Depq.new
+    q.insert 2
+    q.insert 3
+    q.insert 1
+    assert_equal([1,3], q.minmax)
+    q.insert 10
+    q.insert 0
+    assert_equal([0,10], q.minmax)
+  end
+
+  def test_stable_minmax
+    q = Depq.new
+    q.insert :a, 2
+    q.insert :b, 2
+    q.insert :c, 1
+    q.insert :d, 1
+    q.insert :e, 2
+    q.insert :f, 1
+    q.insert :g, 2
+    q.insert :h, 1
+    assert_equal([:c, :a], q.minmax)
+  end
+
+  def test_stable_minmax2
+    q = Depq.new
+    q.insert :a, 1, 0
+    q.insert :b, 2, 1
+    q.insert :c, 2, 2
+    assert_equal([:a, :b], q.minmax)
+    q.insert :d, 3, 3
+    assert_equal([:a, :d], q.minmax)
+  end
+
+  def test_minmax_upheap_minside
+    q = Depq.new
+    q.insert :a, 1, 0
+    q.insert :b, 2, 1
+    assert_equal([:a, :b], q.minmax)
+    q.insert :c, 0, 2
+    assert_equal([:c, :b], q.minmax)
+  end
+
+  def test_minmax_upheap_minside2
+    q = Depq.new
+    q.insert :a, 1, 0
+    q.insert :b, 2, 1
+    assert_equal([:a, :b], q.minmax)
+    q.insert :c, 2, 2
+    assert_equal([:a, :b], q.minmax)
+  end
+
+  def test_minmax_downheap_minside
+    q = Depq.new
+    q.insert :a, 1
+    q.insert :b, 9
+    q.insert :c, 2
+    q.insert :d, 5
+    q.insert :e, 6
+    q.insert :f, 7
+    assert_equal([:a, :b], q.minmax)
+    assert_equal(:a, q.delete_min)
+    assert_equal(:c, q.delete_min)
+    assert_equal(:d, q.delete_min)
+    assert_equal(:e, q.delete_min)
+    assert_equal(:f, q.delete_min)
+    assert_equal(:b, q.delete_min)
+    assert_equal(nil, q.delete_min)
+  end
+
+  def test_minmax_downheap_minside2
+    q = Depq.new
+    q.insert :a, 1
+    q.insert :b, 9
+    q.insert :c, 2, 10
+    q.insert :d, 5
+    q.insert :e, 2, 9
+    q.insert :f, 7
+    assert_equal([:a, :b], q.minmax)
+    assert_equal(:a, q.delete_min)
+    assert_equal(:e, q.delete_min)
+    assert_equal(:c, q.delete_min)
+    assert_equal(:d, q.delete_min)
+    assert_equal(:f, q.delete_min)
+    assert_equal(:b, q.delete_min)
+    assert_equal(nil, q.delete_min)
+  end
+
+  def test_minmax_downheap_maxside
+    q = Depq.new
+    q.insert :a, 1
+    q.insert :b, 9
+    q.insert :c, 2
+    q.insert :d, 7
+    q.insert :e, 6
+    q.insert :f, 5
+    assert_equal([:a, :b], q.minmax)
+    assert_equal(:b, q.delete_max)
+    assert_equal(:d, q.delete_max)
+    assert_equal(:e, q.delete_max)
+    assert_equal(:f, q.delete_max)
+    assert_equal(:c, q.delete_max)
+    assert_equal(:a, q.delete_max)
+    assert_equal(nil, q.delete_max)
+  end
+
+  def test_minmax_downheap_maxside2
+    q = Depq.new
+    q.insert :a, 1
+    q.insert :b, 9
+    q.insert :c, 2
+    q.insert :d, 7
+    q.insert :e, 6
+    q.insert :f, 7
+    assert_equal([:a, :b], q.minmax)
+    assert_equal(:b, q.delete_max)
+    assert_equal(:d, q.delete_max)
+    assert_equal(:f, q.delete_max)
+    assert_equal(:e, q.delete_max)
+    assert_equal(:c, q.delete_max)
+    assert_equal(:a, q.delete_max)
+    assert_equal(nil, q.delete_max)
+  end
+
+  def test_minmax_upheap_sub
+    q = Depq.new
+    q.insert :a, 1
+    q.insert :b, 2
+    assert_equal([:a, :b], q.minmax)
+    q.insert :c, 1
+    assert_equal([:a, :b], q.minmax)
+  end
+
+  def test_minmax_downheap_sub
+    q = Depq.new
+    q.insert :a, 1
+    q.insert :b, 5
+    q.insert :c, 2
+    q.insert :d, 3
+    q.insert :e, 5
+    q.insert :f, 5
+    assert_equal([:a, :b], q.minmax)
+  end
+
+  def test_minmax_adjust
+    q = Depq.new
+    q.insert :a, 1
+    q.insert :b, 5
+    q.insert :c, 2
+    assert_equal([:a, :b], q.minmax)
+    q.insert :d, 1
+    assert_equal([:a, :b], q.minmax)
   end
 
   def test_delete_unspecified
@@ -794,25 +1012,38 @@ class TestDepq < Test::Unit::TestCase
   end
 
   def test_merge_enumerator
-    loc = Depq.merge(1..4, 3..6)
-    assert_equal(1, loc.next)
-    assert_equal(2, loc.next)
-    assert_equal(3, loc.next)
-    assert_equal(3, loc.next)
-    assert_equal(4, loc.next)
-    assert_equal(4, loc.next)
-    assert_equal(5, loc.next)
-    assert_equal(6, loc.next)
-    assert_raise(StopIteration) { loc.next }
+    e = Depq.merge(1..4, 3..6)
+    assert_equal(1, e.next)
+    assert_equal(2, e.next)
+    assert_equal(3, e.next)
+    assert_equal(3, e.next)
+    assert_equal(4, e.next)
+    assert_equal(4, e.next)
+    assert_equal(5, e.next)
+    assert_equal(6, e.next)
+    assert_raise(StopIteration) { e.next }
   end
 
   def test_merge_enumerator2
-    loc = Depq.merge(1..4, 3..6)
+    e = Depq.merge(1..4, 3..6)
     a = []
-    loc.each_slice(2) {|x|
+    e.each_slice(2) {|x|
       a << x
     }
     assert_equal([[1,2],[3,3],[4,4],[5,6]], a)
+  end
+
+  def test_merge_empty
+    e = Depq.merge(1..4, 2...2, 3..6)
+    assert_equal(1, e.next)
+    assert_equal(2, e.next)
+    assert_equal(3, e.next)
+    assert_equal(3, e.next)
+    assert_equal(4, e.next)
+    assert_equal(4, e.next)
+    assert_equal(5, e.next)
+    assert_equal(6, e.next)
+    assert_raise(StopIteration) { e.next }
   end
 
 end
