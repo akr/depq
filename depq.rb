@@ -35,7 +35,7 @@
 # * double-ended - you can get a value with maximum priority too
 # * stable - you will get the value inserted first with minimum/maximum priority
 # * priority update - usable for Dijkstra's shortest path algorithm and various graph algorithms
-# * implicit heap - heap embedded in array.  most operations are O(log n) at worst
+# * implicit heap - compact heap representation using array.  most operations are O(log n) at worst
 #
 # == Introduction
 #
