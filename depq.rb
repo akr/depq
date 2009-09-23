@@ -36,6 +36,7 @@
 # * stable - you will get the value inserted first with minimum/maximum priority
 # * priority update - usable for Dijkstra's shortest path algorithm and various graph algorithms
 # * implicit heap - compact heap representation using array.  most operations are O(log n) at worst
+# * iterator operations: nlargest, nsmallest and merge
 #
 # == Introduction
 #
