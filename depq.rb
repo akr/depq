@@ -26,14 +26,16 @@
 
 # = Depq - Double-Ended Priority Queue
 #
+# depq is double-ended stable priority queue with priority update operation implemented using implicit heap.
+#
 # ==  Features
 #
 # * queue - you can insert and delete values
 # * priority - you can get a value with minimum priority
 # * double-ended - you can get a value with maximum priority too
 # * stable - you will get the value inserted first with minimum/maximum priority
-# * update priority - usable for Dijkstra's shortest path algorithm and various graph algorithms
-# * implicit binary heap - most operations are O(log n) at worst
+# * priority update - usable for Dijkstra's shortest path algorithm and various graph algorithms
+# * implicit heap - heap embedded in array.  most operations are O(log n) at worst
 #
 # == Introduction
 #
