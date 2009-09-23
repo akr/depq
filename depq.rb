@@ -1,4 +1,4 @@
-# depq.rb - Feature Rich Double-Ended Priority Queue.
+# depq.rb - Double-Ended Priority Queue.
 #
 # Copyright (C) 2009 Tanaka Akira  <akr@fsij.org>
 # 
@@ -24,7 +24,7 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 # OF SUCH DAMAGE.
 
-# Depq - Feature Rich Double-Ended Priority Queue.
+# Depq - Double-Ended Priority Queue.
 #
 # = Features
 #
