@@ -1,19 +1,19 @@
 = Depq - Double-Ended Priority Queue
 
-= Features
+== Features
 
 * queue - you can insert and delete values
 * priority - you can get a value with minimum priority
 * double-ended - you can get a value with maximum priority too
-* stable - you don't need to maintain timestamps yourself
+* stable - you will get the value inserted first with minimum/maximum priority
 * update priority - usable for Dijkstra's shortest path algorithm and various graph algorithms
-* implicit binary heap - most operations are O(log n) at worst
+* heap - most operations are O(log n) at worst
 
-= Install
+== Install
 
   gem install depq
 
-= Links
+== Links
 
 * ((<reference manual|URL:http://depq.rubyforge.org/rdoc/classes/Depq.html>))
 * ((<home page on rubyforge|URL:http://depq.rubyforge.org/>))
@@ -21,12 +21,12 @@
 * ((<source repository on github|URL:http://github.com/akr/depq>))
 * ((<raa entry|URL:http://raa.ruby-lang.org/project/depq/>))
 
-= Introduction
+== Introduction
 
-== Simple Insertion/Deletion
+=== Simple Insertion/Deletion
 
 You can insert values into a Depq object.
-You can deletes the values from the object from ascending/descending order.
+You can delete the values from the object from ascending/descending order.
 delete_min deletes the minimum value.
 It is used for ascending order.
 
@@ -47,7 +47,7 @@ delete_max is similar to delete_min except it deletes maximum element
 instead of minimum.
 It is used for descending order.
 
-== The Order
+=== The Order
 
 The order is defined by the priorities corresponds to the values and
 comparison operator specified for the queue.
@@ -64,8 +64,7 @@ comparison operator specified for the queue.
 If there are multiple values with same priority, subpriority is used to compare them.
 subpriority is an integer which can be specified by 3rd argument of insert.
 If it is not specified, total number of inserted elements is used.
-So Depq is "stable" with delete_min.
-The element inserted first is minimum and deleted first.
+So Depq is "stable" which means that the element inserted first is deleted first.
 
   q = Depq.new
   q.insert "a", 1    # "a", "c" and "e" has same priority: 1
@@ -81,22 +80,36 @@ The element inserted first is minimum and deleted first.
   p q.delete_min     #=> "c"
   p q.delete_min     #=> "e"         last element with priority 1
 
-Note that delete_max is also stable.
+delete_max is also stable.
 This means delete_max deletes the element with maximum priority with "minimum" subpriority.
 
-== Update Element
+  q = Depq.new
+  q.insert "a", 1    # "a", "c" and "e" has same priority: 1
+  q.insert "b", 0    # "b", "d" and "f" has same priority: 0
+  q.insert "c", 1
+  q.insert "d", 0
+  q.insert "e", 1
+  q.insert "f", 0
+  p q.delete_max     #=> "a"         first element with priority 1
+  p q.delete_max     #=> "c"
+  p q.delete_max     #=> "e"         last element with priority 1
+  p q.delete_max     #=> "b"         first element with priority 0
+  p q.delete_max     #=> "d"
+  p q.delete_max     #=> "f"         last element with priority 0
+
+=== Update Element
 
 An inserted element can be modified and/or deleted.
-This is done using Depq::Locator object.
+The element to be modified is specified by Depq::Locator object.
 It is returned by insert, find_min_locator, etc.
 
   q = Depq.new
   d = q.insert "durian", 1
   m = q.insert "mangosteen", 2
   c = q.insert "cherry", 3
-  p m                         #=> #<Depq::Locator: "mangosteen":2>
-  p m.value                   #=> "mangosteen"
-  p m.priority                #=> 2
+  p m                        #=> #<Depq::Locator: "mangosteen":2>
+  p m.value                  #=> "mangosteen"
+  p m.priority               #=> 2
   p q.find_min               #=> "durian"
   p q.find_min_locator       #=> #<Depq::Locator: "durian":1>
   m.update("mangosteen", 0)
@@ -151,18 +164,18 @@ A* search algorithm, etc.
    #    [["A", "B", "C"], 3],
    #    [["A", "B", "C", "D"], 4]]
 
-= Internal Heap Algorithm
+== Internal Heap Algorithm
 
 Depq uses min-heap, max-heap or interval-heap internally.
 When delete_min is used, min-heap is constructed.
 When delete_max is used, max-heap is constructed.
 When delete_min and delete_max is used, interval-heap is constructed.
 
-= Author
+== Author
 
 Tanaka Akira <akr@fsij.org>
 
-= License
+== License
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
