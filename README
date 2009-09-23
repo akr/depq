@@ -13,11 +13,13 @@
 
   gem install depq
 
-= Development
+= Links
 
 * ((<home page on rubyforge|URL:http://depq.rubyforge.org/>))
 * ((<project info on rubyforge|URL:http://rubyforge.org/projects/depq/>))
 * ((<source repository on github|URL:http://github.com/akr/depq>))
+* ((<RAA entry|URL:http://raa.ruby-lang.org/project/depq/>))
+* ((<Reference Manual|URL:http://depq.rubyforge.org/rdoc/classes/Depq.html>))
 
 = Introduction
 
