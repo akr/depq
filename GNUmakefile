@@ -8,7 +8,7 @@ www:
 	rdoc --op www/rdoc -T frameless depq.rb
 
 www-upload:
-	scp -r www/. akr@rubyforge.org:/var/www/gforge-projects/depq/
+	scp -r www/. rubyforge.org:/var/www/gforge-projects/depq/
 	echo http://depq.rubyforge.org/
 
 .PHONY: www www-upload
