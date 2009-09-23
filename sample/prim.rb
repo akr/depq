@@ -4,6 +4,9 @@
 #
 # http://en.wikipedia.org/wiki/Prim's_algorithm
 #
+# usage:
+#   ruby -I. sample/prim.rb
+#
 
 require 'depq'
 
