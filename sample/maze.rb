@@ -6,17 +6,19 @@
 require_relative 'astar'
 
 MAZE_MAP = <<'End'
-OOOOOOOOOOOOOOOOOOOOO
-OS    O     O       O
-O OOO O OOO O OOOOO O
-O O   O   O   O O   O
-O OOOOOOO OOO O O OOO
-O   O   O   O   O O O
-OOO O OOO O OOOOO O O
-O     O   O   O     O
-O OOOOO O OOOOO OOOOO
-O       O   O      GO
-OOOOOOOOOOOOOOOOOOOOO
+OOOOOOOOOOOOOOOOOOOOOOOOO
+O         OSO   O       O
+O OOOOOOOOO O O OOO OOO O
+O         O   O   O O   O
+O OOOOOOO OOOOOOO OOO O O
+O     O   O     O     O O
+OOOOO O O OOO OOOOOOOOO O
+OG  O O O   O     O O   O
+O O O O OOO OOO O O O OOO
+O O O O O       O   O   O
+O OOO O OOOOOOOOOOOOOOO O
+O     O                 O
+OOOOOOOOOOOOOOOOOOOOOOOOO
 End
 
 MAZE = MAZE_MAP.lines.map {|line| line.chomp.split(//) }
