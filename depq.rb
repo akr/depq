@@ -24,23 +24,23 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 # OF SUCH DAMAGE.
 
-# Depq - Double-Ended Priority Queue.
+# = Depq - Double-Ended Priority Queue
 #
-# = Features
+# ==  Features
 #
 # * queue - you can insert and delete values
 # * priority - you can get a value with minimum priority
 # * double-ended - you can get a value with maximum priority too
-# * stable - you don't need to maintain timestamps yourself
+# * stable - you will get the value inserted first with minimum/maximum priority
 # * update priority - usable for Dijkstra's shortest path algorithm and various graph algorithms
 # * implicit binary heap - most operations are O(log n) at worst
 #
-# = Introduction
+# == Introduction
 #
-# == Simple Insertion/Deletion
+# === Simple Insertion/Deletion
 #
 # You can insert values into a Depq object.
-# You can deletes the values from the object from ascending/descending order.
+# You can delete the values from the object from ascending/descending order.
 # delete_min deletes the minimum value.
 # It is used for ascending order.
 #
@@ -61,13 +61,13 @@
 # instead of minimum.
 # It is used for descending order.
 #
-# == The Order
+# === The Order
 #
-# The order is defined by the priorities corresnponds to the values and
+# The order is defined by the priorities corresponds to the values and
 # comparison operator specified for the queue.
 #
 #   q = Depq.new(:casecmp)   # use casecmp instead of <=>.
-#   q.inesrt 1, "Foo"          # specify the priority for 1 as "Foo"
+#   q.insert 1, "Foo"          # specify the priority for 1 as "Foo"
 #   q.insert 2, "bar"
 #   q.insert 3, "Baz"
 #   p q.delete_min     #=> 2   # "bar" is minimum
@@ -78,8 +78,7 @@
 # If there are multiple values with same priority, subpriority is used to compare them.
 # subpriority is an integer which can be specified by 3rd argument of insert.
 # If it is not specified, total number of inserted elements is used.
-# So Depq is "stable" with delete_min.
-# The element inserted first is minimum and deleted first.
+# So Depq is "stable" which means that the element inserted first is deleted first.
 #
 #   q = Depq.new
 #   q.insert "a", 1    # "a", "c" and "e" has same priority: 1
@@ -98,10 +97,24 @@
 # Note that delete_max is also stable.
 # This means delete_max deletes the element with maximum priority with "minimum" subpriority.
 #
-# == Update Element
+#   q = Depq.new
+#   q.insert "a", 1    # "a", "c" and "e" has same priority: 1
+#   q.insert "b", 0    # "b", "d" and "f" has same priority: 0
+#   q.insert "c", 1
+#   q.insert "d", 0
+#   q.insert "e", 1
+#   q.insert "f", 0
+#   p q.delete_max     #=> "a"         first element with priority 1
+#   p q.delete_max     #=> "c"
+#   p q.delete_max     #=> "e"         last element with priority 1
+#   p q.delete_max     #=> "b"         first element with priority 0
+#   p q.delete_max     #=> "d"
+#   p q.delete_max     #=> "f"         last element with priority 0
+#
+# === Update Element
 #
 # An inserted element can be modified and/or deleted.
-# This is done using Depq::Locator object.
+# The element to be modified is specified by Depq::Locator object.
 # It is returned by insert, find_min_locator, etc.
 #
 #   q = Depq.new
@@ -165,7 +178,7 @@
 #    #    [["A", "B", "C"], 3],
 #    #    [["A", "B", "C", "D"], 4]]
 #
-# = Internal Heap Algorithm
+# == Internal Heap Algorithm
 #
 # Depq uses min-heap, max-heap or interval-heap internally.
 # When delete_min is used, min-heap is constructed.
@@ -215,6 +228,12 @@ class Depq
     define_method(:hash, Object.instance_method(:hash))
 
     # Create a Depq::Locator object.
+    #
+    #   loc = Depq::Locator.new("a", 1, 2)
+    #   p loc.value             #=> "a"
+    #   p loc.priority          #=> 1
+    #   p loc.subpriority       #=> 2
+    #
     def initialize(value, priority=value, subpriority=nil)
       super value, subpriority, priority
     end
@@ -245,7 +264,7 @@ class Depq
 
     # returns the queue.
     #
-    # nil is returned if the locator is not in a depq.
+    # nil is returned if the locator is not in a queue.
     def depq
       in_queue? ? depq_or_subpriority() : nil
     end
@@ -374,7 +393,7 @@ class Depq
   # Create a Depq object.
   #
   # The optional argument, cmp, specify the method to compare priorities.
-  # It should be a symbol or a Proc which takes two arguments.
+  # It should be a symbol or a comparator like a Proc which takes two arguments and returns -1, 0, 1.
   # If it is omitted, :<=> is used.
   #
   #   q = Depq.new
@@ -392,6 +411,14 @@ class Depq
   #   q = Depq.new(lambda {|a,b| a.casecmp(b) })
   #   q.insert "Foo"
   #   q.insert "bar"
+  #   p q.delete_min   #=> "bar"
+  #   p q.delete_min   #=> "Foo"
+  #
+  #   cmp = Object.new
+  #   def cmp.call(a,b) a.casecmp(b) end
+  #   q = Depq.new(cmp)                         
+  #   q.insert "Foo"            
+  #   q.insert "bar"            
   #   p q.delete_min   #=> "bar"
   #   p q.delete_min   #=> "Foo"
   #
@@ -561,6 +588,9 @@ class Depq
   #   p q.compare_priority("a", "b") #=> -1
   #   p q.compare_priority("a", "a") #=> 0
   #   p q.compare_priority("b", "a") #=> 1
+  #
+  #   q = Depq.new(:casecmp)
+  #   p q.compare_priority("a", "A") #=> 0
   #
   def compare_priority(priority1, priority2)
     if @cmp.kind_of? Symbol
@@ -735,7 +765,7 @@ class Depq
 
   # insert all values in iter.
   #
-  # The argument, iter, should have each method.
+  # The argument, iter, should have +each+ method.
   #
   # This method returns nil.
   #
@@ -758,12 +788,15 @@ class Depq
   #
   # This method doesn't delete the element from the queue.
   #
-  #   q = Depq.new
-  #   p q.find_min_locator     #=> nil
-  #   q.insert 3
-  #   q.insert 1
-  #   q.insert 2
+  #   q = Depq.new 
+  #   p q.find_min_locator     #=> nil 
+  #   q.insert 3 
+  #   q.insert 1 
+  #   q.insert 2 
+  #   p q.find_min_locator     #=> #<Depq::Locator: 1> 
   #   p q.find_min_locator     #=> #<Depq::Locator: 1>
+  #   p q.delete_min           #=> 1
+  #   p q.find_min_locator     #=> #<Depq::Locator: 2>
   #
   def find_min_locator
     return nil if empty?
@@ -782,6 +815,9 @@ class Depq
   #   q.insert "banana", 3
   #   q.insert "melon", 2
   #   p q.find_min_priority    #=> ["durian", 1]
+  #   p q.find_min_priority    #=> ["durian", 1]
+  #   p q.delete_min           #=> "durian"
+  #   p q.find_min_priority    #=> ["melon", 2]
   #   q.clear
   #   p q.find_min_priority    #=> nil
   #
@@ -794,12 +830,15 @@ class Depq
   #
   # This method doesn't delete the element from the queue.
   #
-  #   q = Depq.new
-  #   p q.find_min     #=> nil
-  #   q.insert 3
-  #   q.insert 1
-  #   q.insert 2
+  #   q = Depq.new 
+  #   p q.find_min     #=> nil 
+  #   q.insert 3 
+  #   q.insert 1 
+  #   q.insert 2 
+  #   p q.find_min     #=> 1 
   #   p q.find_min     #=> 1
+  #   p q.delete_min   #=> 1
+  #   p q.find_min     #=> 2
   #
   def find_min
     loc = find_min_locator and loc.value
@@ -818,6 +857,10 @@ class Depq
   #   q.insert 1
   #   q.insert 2
   #   p q.find_max_locator     #=> #<Depq::Locator: 3>
+  #   p q.find_max_locator     #=> #<Depq::Locator: 3>
+  #   p q.find_max_locator     #=> #<Depq::Locator: 3>
+  #   p q.delete_max           #=> 3
+  #   p q.find_max_locator     #=> #<Depq::Locator: 2>
   #
   def find_max_locator
     return nil if empty?
@@ -836,6 +879,9 @@ class Depq
   #   q.insert "banana", 3
   #   q.insert "melon", 2
   #   p q.find_max_priority    #=> ["banana", 3]
+  #   p q.find_max_priority    #=> ["banana", 3]
+  #   p q.delete_max           #=> "banana"
+  #   p q.find_max_priority    #=> ["melon", 2]
   #   q.clear
   #   p q.find_max_priority    #=> nil
   #
@@ -854,6 +900,9 @@ class Depq
   #   q.insert 1
   #   q.insert 2
   #   p q.find_max     #=> 3
+  #   p q.find_max     #=> 3
+  #   p q.delete_max   #=> 3
+  #   p q.find_max     #=> 2
   #
   def find_max
     loc = find_max_locator and loc.value
