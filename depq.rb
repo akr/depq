@@ -417,9 +417,10 @@ class Depq
   #   p q.delete_min   #=> "bar"
   #   p q.delete_min   #=> "Foo"
   #
-  #   cmp = Object.new
-  #   def cmp.call(a,b) a.casecmp(b) end
-  #   q = Depq.new(cmp)                         
+  #   class Cmp
+  #     def call(a,b) a.casecmp(b) end
+  #   end
+  #   q = Depq.new(Cmp.new)                         
   #   q.insert "Foo"            
   #   q.insert "bar"            
   #   p q.delete_min   #=> "bar"
