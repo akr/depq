@@ -1532,7 +1532,6 @@ class Depq
     def update_prio(q, ary, loc, priority, subpriority)
       i = loc.send(:index)
       ei, pi, si = get_entry(ary, i)
-      subpriority ||= si
       cmp = q.send(:compare_for_max, pi, si, priority, subpriority)
       set_entry(ary, i, ei, priority, subpriority)
       if cmp < 0
@@ -1791,7 +1790,6 @@ class Depq
     def update_prio(q, ary, loc, prio, subprio)
       i = loc.send(:index)
       ei, pi, si = get_entry(ary, i)
-      subpriority ||= si
       set_entry(ary, i, ei, prio, subprio)
       range = 0...size(ary)
       adjust(q, ary, i, range)
