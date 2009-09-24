@@ -1504,8 +1504,8 @@ class Depq
     def update_prio(q, ary, loc, priority, subpriority)
       i = loc.send(:index)
       ei, pi, si = get_entry(ary, i)
-      cmp = q.send(:compare_for_min, pi, si, priority, subpriority)
       set_entry(ary, i, ei, priority, subpriority)
+      cmp = q.send(:compare_for_min, pi, si, priority, subpriority)
       if cmp < 0
         # loc.priority < priority
         downheap(q, ary, i)
@@ -1532,8 +1532,8 @@ class Depq
     def update_prio(q, ary, loc, priority, subpriority)
       i = loc.send(:index)
       ei, pi, si = get_entry(ary, i)
-      cmp = q.send(:compare_for_max, pi, si, priority, subpriority)
       set_entry(ary, i, ei, priority, subpriority)
+      cmp = q.send(:compare_for_max, pi, si, priority, subpriority)
       if cmp < 0
         # loc.priority < priority
         upheap(q, ary, i)
