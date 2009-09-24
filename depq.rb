@@ -1172,7 +1172,7 @@ class Depq
   #
   # If _subpriority_ is not given or nil, totalcount is used.
   #
-  # This is virtually same as delete_min and insert.
+  # This is virtually same as delete_min and insert except the locator is reused.
   # This method increment totalcount.
   #
   #   q = Depq.new
@@ -1189,7 +1189,9 @@ class Depq
   def replace_min(value, priority=value, subpriority=nil)
     subpriority ||= @totalcount
     @totalcount += 1
-    find_min_locator.update(value, priority, subpriority)
+    loc = find_min_locator
+    loc.update(value, priority, subpriority)
+    loc
   end
 
   # replaces the maximum element.
@@ -1198,7 +1200,7 @@ class Depq
   #
   # If _subpriority_ is not given or nil, totalcount is used.
   #
-  # This is virtually same as delete_max and insert.
+  # This is virtually same as delete_max and insert except the locator is reused.
   # This method increment totalcount.
   #
   #   q = Depq.new
@@ -1215,7 +1217,9 @@ class Depq
   def replace_max(value, priority=value, subpriority=nil)
     subpriority ||= @totalcount
     @totalcount += 1
-    find_max_locator.update(value, priority, subpriority)
+    loc = find_max_locator
+    loc.update(value, priority, subpriority)
+    loc
   end
 
   # iterate over the locators in the queue.

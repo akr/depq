@@ -951,9 +951,10 @@ class TestDepq < Test::Unit::TestCase
     q.insert 2
     q.insert 0
     assert_equal(0, q.min)
-    assert_equal(2, q.find_min_locator.subpriority)
+    loc = q.find_min_locator
+    assert_equal(2, loc.subpriority)
     assert_equal(3, q.totalcount)
-    q.replace_min(10)
+    assert_equal(loc, q.replace_min(10))
     assert_equal(4, q.totalcount)
     assert_equal(1, q.delete_min)
     assert_equal(2, q.delete_min)
@@ -968,9 +969,10 @@ class TestDepq < Test::Unit::TestCase
     q.insert 4
     q.insert 2
     assert_equal(4, q.max)
-    assert_equal(1, q.find_min_locator.subpriority)
+    loc = q.find_max_locator
+    assert_equal(1, loc.subpriority)
     assert_equal(3, q.totalcount)
-    q.replace_max(1)
+    assert_equal(loc, q.replace_max(1))
     assert_equal(4, q.totalcount)
     assert_equal(3, q.delete_max)
     assert_equal(2, q.delete_max)
