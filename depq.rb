@@ -1166,6 +1166,58 @@ class Depq
     loc.value
   end
 
+  # replaces the minimum element.
+  #
+  # If _priority_ is not given, _value_ is used.
+  #
+  # If _subpriority_ is not given or nil, totalcount is used.
+  #
+  # This is virtually same as delete_min and insert.
+  # This method increment totalcount.
+  #
+  #   q = Depq.new
+  #   q.insert 2
+  #   q.insert 4
+  #   q.insert 3
+  #   p q.min           #=> 2
+  #   q.replace_min(5) 
+  #   p q.delete_min    #=> 3
+  #   p q.delete_min    #=> 4
+  #   p q.delete_min    #=> 5
+  #   p q.delete_min    #=> nil
+  #
+  def replace_min(value, priority=value, subpriority=nil)
+    subpriority ||= @totalcount
+    @totalcount += 1
+    find_min_locator.update(value, priority, subpriority)
+  end
+
+  # replaces the maximum element.
+  #
+  # If _priority_ is not given, _value_ is used.
+  #
+  # If _subpriority_ is not given or nil, totalcount is used.
+  #
+  # This is virtually same as delete_max and insert.
+  # This method increment totalcount.
+  #
+  #   q = Depq.new
+  #   q.insert 1
+  #   q.insert 4
+  #   q.insert 3
+  #   p q.max           #=> 4
+  #   q.replace_max(2)
+  #   p q.delete_max    #=> 3
+  #   p q.delete_max    #=> 2
+  #   p q.delete_max    #=> 1
+  #   p q.delete_max    #=> nil
+  #
+  def replace_max(value, priority=value, subpriority=nil)
+    subpriority ||= @totalcount
+    @totalcount += 1
+    find_max_locator.update(value, priority, subpriority)
+  end
+
   # iterate over the locators in the queue.
   #
   # The iteration order is unspecified.

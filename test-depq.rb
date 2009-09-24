@@ -945,6 +945,40 @@ class TestDepq < Test::Unit::TestCase
     assert_equal(nil, q.delete_unspecified_locator)
   end
 
+  def test_replace_min
+    q = Depq.new
+    q.insert 1
+    q.insert 2
+    q.insert 0
+    assert_equal(0, q.min)
+    assert_equal(2, q.find_min_locator.subpriority)
+    assert_equal(3, q.totalcount)
+    q.replace_min(10)
+    assert_equal(4, q.totalcount)
+    assert_equal(1, q.delete_min)
+    assert_equal(2, q.delete_min)
+    assert_equal(3, q.find_min_locator.subpriority)
+    assert_equal(10, q.delete_min)
+    assert_equal(nil, q.delete_min)
+  end
+
+  def test_replace_max
+    q = Depq.new
+    q.insert 3
+    q.insert 4
+    q.insert 2
+    assert_equal(4, q.max)
+    assert_equal(1, q.find_min_locator.subpriority)
+    assert_equal(3, q.totalcount)
+    q.replace_max(1)
+    assert_equal(4, q.totalcount)
+    assert_equal(3, q.delete_max)
+    assert_equal(2, q.delete_max)
+    assert_equal(3, q.find_min_locator.subpriority)
+    assert_equal(1, q.delete_max)
+    assert_equal(nil, q.delete_max)
+  end
+
   def test_each
     q = Depq.new
     a = [1,2,0]
