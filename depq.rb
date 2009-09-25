@@ -474,44 +474,44 @@ class Depq
   private :each_entry
 
   def use_min
-    if @mode == MinHeap || @mode == IntervalHeap
+    if @mode.equal?(MinMode) || @mode.equal?(IntervalMode)
       if @heapsize < self.size
-        @heapsize = @mode.heapify(self, @ary, @heapsize)
+        @heapsize = send(@mode[:heapify], @heapsize)
       end
     else
-      @mode = MinHeap
-      @heapsize = @mode.heapify(self, @ary)
+      @mode = MinMode
+      @heapsize = send(@mode[:heapify])
     end
   end
   private :use_min
 
   def use_max
-    if @mode == MaxHeap || @mode == IntervalHeap
+    if @mode.equal?(MaxMode) || @mode.equal?(IntervalMode)
       if @heapsize < self.size
-        @heapsize = @mode.heapify(self, @ary, @heapsize)
+        @heapsize = send(@mode[:heapify], @heapsize)
       end
     else
-      @mode = MaxHeap
-      @heapsize = @mode.heapify(self, @ary)
+      @mode = MaxMode
+      @heapsize = send(@mode[:heapify])
     end
   end
   private :use_max
 
   def use_minmax
-    if @mode == IntervalHeap
+    if @mode.equal?(IntervalMode)
       if @heapsize < self.size
-        @heapsize = @mode.heapify(self, @ary, @heapsize)
+        @heapsize = send(@mode[:heapify], @heapsize)
       end
     else
-      @mode = IntervalHeap
-      @heapsize = @mode.heapify(self, @ary)
+      @mode = IntervalMode
+      @heapsize = send(@mode[:heapify])
     end
   end
   private :use_minmax
 
   def mode_heapify
     if @mode
-      @heapsize = @mode.heapify(self, @ary)
+      @heapsize = send(@mode[:heapify])
     end
   end
   private :mode_heapify
@@ -529,18 +529,6 @@ class Depq
     self.totalcount
   end
   private :default_subpriority
-
-  def compare_for_min(priority1, subpriority1, priority2, subpriority2)
-    compare_priority(priority1, priority2).nonzero? or
-    (subpriority1 <=> subpriority2)
-  end
-  private :compare_for_min
-
-  def compare_for_max(priority1, subpriority1, priority2, subpriority2)
-    compare_priority(priority1, priority2).nonzero? or
-    (subpriority2 <=> subpriority1)
-  end
-  private :compare_for_max
 
   def initialize_copy(obj) # :nodoc:
     if defined? @ary
@@ -695,7 +683,7 @@ class Depq
       set_entry(loc.send(:index), loc, priority, subpriority)
     else
       mode_heapify
-      @mode.update_prio(self, @ary, loc, priority, subpriority)
+      send(@mode[:update_prio], loc, priority, subpriority)
     end
   end
   private :internal_set_priority
@@ -805,7 +793,7 @@ class Depq
   def find_min_locator
     return nil if empty?
     use_min
-    @mode.find_min_loc(self, @ary)
+    send(@mode[:find_min_loc])
   end
 
   # return the minimum value with its priority.
@@ -869,7 +857,7 @@ class Depq
   def find_max_locator
     return nil if empty?
     use_max
-    @mode.find_max_loc(self, @ary)
+    send(@mode[:find_max_loc])
   end
 
   # return the maximum value with its priority.
@@ -927,7 +915,7 @@ class Depq
   def find_minmax_locator
     return [nil, nil] if empty?
     use_minmax
-    return @mode.find_minmax_loc(self, @ary)
+    return send(@mode[:find_minmax_loc])
   end
 
   # returns the minimum and maximum value as a two-element array.
@@ -969,7 +957,7 @@ class Depq
       loc
     else
       mode_heapify
-      @heapsize = @mode.delete_loc(self, @ary, loc)
+      @heapsize = send(@mode[:delete_loc], loc)
       loc
     end
   end
@@ -991,8 +979,8 @@ class Depq
   def delete_min_locator
     return nil if empty?
     use_min
-    loc = @mode.find_min_loc(self, @ary)
-    @heapsize = @mode.delete_loc(self, @ary, loc)
+    loc = send(@mode[:find_min_loc])
+    @heapsize = send(@mode[:delete_loc], loc)
     loc
   end
 
@@ -1056,8 +1044,8 @@ class Depq
   def delete_max_locator
     return nil if empty?
     use_max
-    loc = @mode.find_max_loc(self, @ary)
-    @heapsize = @mode.delete_loc(self, @ary, loc)
+    loc = send(@mode[:find_max_loc])
+    @heapsize = send(@mode[:delete_loc], loc)
     loc
   end
 
@@ -1411,502 +1399,513 @@ class Depq
     end
   end
 
+  private
   # :stopdoc:
 
-  module HeapArray
-    def size(ary)
-      return ary.size / ARY_SLICE_SIZE
-    end
+  ## utilities for heap implementation
 
-    def get_entry(ary, i)
-      locator = ary[i*ARY_SLICE_SIZE+0]
-      priority = ary[i*ARY_SLICE_SIZE+1]
-      subpriority = ary[i*ARY_SLICE_SIZE+2]
-      [locator, priority, subpriority]
-    end
+  def swap(i, j)
+    ei, pi, si = get_entry(i)
+    ej, pj, sj = get_entry(j)
+    set_entry(i, ej, pj, sj)
+    set_entry(j, ei, pi, si)
+    ei.send(:index=, j)
+    ej.send(:index=, i)
+  end
 
-    def set_entry(ary, i, locator, priority, subpriority)
-      tmp = Array.new(ARY_SLICE_SIZE)
-      tmp[0] = locator
-      tmp[1] = priority
-      tmp[2] = subpriority
-      ary[i*ARY_SLICE_SIZE, ARY_SLICE_SIZE] = tmp
-    end
+  ## common part of min-heap and max-heap
 
-    def delete_entry(ary, i)
-      locator, priority, subpriority = ary[i*ARY_SLICE_SIZE, ARY_SLICE_SIZE]
-      ary[i*ARY_SLICE_SIZE, ARY_SLICE_SIZE] = []
-      [locator, priority, subpriority]
-    end
-
-    def swap(ary, i, j)
-      ei, pi, si = get_entry(ary, i)
-      ej, pj, sj = get_entry(ary, j)
-      set_entry(ary, i, ej, pj, sj)
-      set_entry(ary, j, ei, pi, si)
-      ei.send(:index=, j)
-      ej.send(:index=, i)
+  def mm_upheap(j, upper)
+    while true
+      return if j <= 0
+      i = (j-1) >> 1
+      return if upper.call(i, j)
+      swap(j, i)
+      j = i
     end
   end
 
-  module SimpleHeap
-    include HeapArray
-
-    def upheap(q, ary, j)
-      while true
-        return if j <= 0
-        i = (j-1) >> 1
-        return if upper?(q, ary, i, j)
-        swap(ary, j, i)
-        j = i
-      end
-    end
-
-    def downheap(q, ary, i)
-      while true
-        j = i*2+1
-        k = i*2+2
-        return if size(ary) <= j
-        if size(ary) == k
-          return if upper?(q, ary, i, j)
-          swap(ary, i, j)
-          i = j
-        else
-          return if upper?(q, ary, i, j) && upper?(q, ary, i, k)
-          loc = upper?(q, ary, j, k) ? j : k
-          swap(ary, i, loc)
-          i = loc
-        end
-      end
-    end
-
-    def find_top_loc(q, ary)
-      loc, _ = get_entry(ary, 0)
-      loc
-    end
-
-    def delete_loc(q, ary, loc)
-      i = loc.send(:index)
-      _, priority, subpriority = get_entry(ary, i)
-      last = size(ary) - 1
-      loc.send(:internal_deleted, priority, subpriority)
-      el, pl, sl = delete_entry(ary, last)
-      if i != last
-        set_entry(ary, i, el, pl, sl)
-        el.send(:index=, i)
-        downheap(q, ary, i)
-      end
-      size(ary)
-    end
-
-    def heapify(q, ary, heapsize=0)
-      # compare number of data movements in worst case.
-      # choose a way for less data movements.
-      #
-      #   current size = ary.size / ARY_SLICE_SIZE = n
-      #   addition size = n - heapsize = m
-      #   heap tree height = Math.log2(n+1) = h
-      #
-      # worst data movements using downheap:
-      # - bottom elements cannot move.
-      # - elements above can move 1 time.
-      # - ...
-      # - top element can move h-1 times.
-      #
-      #   1*2**(h-2) + 2*2**(h-3) + 3*2**(h-4) + ... + (h-1)*2**0
-      #   = sum i*2**(h-1-i), i=1 to h-1
-      #   = 2**h - h - 1
-      #   = n - h
-      #
-      # worst data movements using upheap
-      # - bottom elements can move h-1 times.
-      # - n/2 elements are placed at bottom.
-      # - approximate all elements are at bottom...
-      #
-      #   (h-1) * m
-      #
-      # condition to use downheap:
-      #
-      #   n - h < (h-1) * m
-      #   n - 1 < (h-1) * (m+1)
-      #
-      currentsize = size(ary)
-      h = Math.log(currentsize+1)/Math.log(2)
-      if currentsize - 1 < (h - 1) * (currentsize - heapsize + 1)
-        n = (currentsize - 2) / 2
-        n.downto(0) {|i|
-          downheap(q, ary, i)
-        }
-      else
-        heapsize.upto(currentsize-1) {|i|
-          upheap(q, ary, i)
-        }
-      end
-      currentsize
-    end
-  end
-
-  module MinHeap
-  end
-  class << MinHeap
-    include SimpleHeap
-
-    def upper?(q, ary, i, j)
-      ei, pi, si = get_entry(ary, i)
-      ej, pj, sj = get_entry(ary, j)
-      q.send(:compare_for_min, pi, si, pj, sj) <= 0
-    end
-
-    def update_prio(q, ary, loc, priority, subpriority)
-      i = loc.send(:index)
-      ei, pi, si = get_entry(ary, i)
-      set_entry(ary, i, ei, priority, subpriority)
-      cmp = q.send(:compare_for_min, pi, si, priority, subpriority)
-      if cmp < 0
-        # loc.priority < priority
-        downheap(q, ary, i)
-      elsif cmp > 0
-        # loc.priority > priority
-        upheap(q, ary, i)
-      end
-    end
-
-    alias find_min_loc find_top_loc
-  end
-
-  module MaxHeap
-  end
-  class << MaxHeap
-    include SimpleHeap
-
-    def upper?(q, ary, i, j)
-      ei, pi, si = get_entry(ary, i)
-      ej, pj, sj = get_entry(ary, j)
-      q.send(:compare_for_max, pi, si, pj, sj) >= 0
-    end
-
-    def update_prio(q, ary, loc, priority, subpriority)
-      i = loc.send(:index)
-      ei, pi, si = get_entry(ary, i)
-      set_entry(ary, i, ei, priority, subpriority)
-      cmp = q.send(:compare_for_max, pi, si, priority, subpriority)
-      if cmp < 0
-        # loc.priority < priority
-        upheap(q, ary, i)
-      elsif cmp > 0
-        # loc.priority > priority
-        downheap(q, ary, i)
-      end
-    end
-
-    alias find_max_loc find_top_loc
-  end
-
-  module IntervalHeap
-  end
-  class << IntervalHeap
-    include HeapArray
-
-    def root?(i) i < 2 end
-    def minside?(i) i.even? end
-    def maxside?(i) i.odd? end
-    def minside(i) i & ~1 end
-    def maxside(i) i | 1 end
-    def parent_minside(j) (j-2)/2 & ~1 end
-    def parent_maxside(j) (j-2)/2 | 1 end
-    def child1_minside(i) i &= ~1; (i*2+2) & ~1 end
-    def child1_maxside(i) i &= ~1; (i*2+2) | 1 end
-    def child2_minside(i) i &= ~1; (i*2+4) & ~1 end
-    def child2_maxside(i) i &= ~1; (i*2+4) | 1 end
-
-    def pcmp(q, ary, i, j)
-      ei, pi, si = get_entry(ary, i)
-      ej, pj, sj = get_entry(ary, j)
-      q.compare_priority(pi, pj)
-    end
-
-    def scmp(q, ary, i, j)
-      ei, pi, si = get_entry(ary, i)
-      ej, pj, sj = get_entry(ary, j)
-      si <=> sj
-    end
-
-    def psame(q, ary, i)
-      pcmp(q, ary, minside(i), maxside(i)) == 0
-    end
-
-    def travel(q, ary, i, range, fix_subpriority)
-      while true
-        j = yield i
-        return i if !j
-        swap ary, i, j
-        if fix_subpriority
-          imin = minside(i)
-          imax = maxside(i)
-          if range.include?(imin) && range.include?(imax)
-            if pcmp(q, ary, imin, imax) == 0 && scmp(q, ary, imin, imax) > 0
-              swap ary, imin, imax
-            end
-          end
-        end
+  def mm_downheap(i, upper)
+    while true
+      j = i*2+1
+      k = i*2+2
+      return if self.size <= j
+      if self.size == k
+        return if upper.call(i, j)
+        swap(i, j)
         i = j
+      else
+        return if upper.call(i, j) && upper.call(i, k)
+        loc = upper.call(j, k) ? j : k
+        swap(i, loc)
+        i = loc
       end
     end
+  end
 
-    def upheap_minside(q, ary, i, range)
-      travel(q, ary, i, range, true) {|j|
-        if root?(j)
-          nil
-        elsif !range.include?(k = parent_minside(j))
-          nil
-        else
-          if pcmp(q, ary, k, j) > 0
-            swap(ary, minside(k), maxside(k)) if psame(q, ary, k)
-            k
-          else
-            nil
-          end
-        end
+  def mm_find_top_loc
+    loc, _ = get_entry(0)
+    loc
+  end
+
+  def mm_delete_loc(loc, upper)
+    i = loc.send(:index)
+    _, priority, subpriority = get_entry(i)
+    last = self.size - 1
+    loc.send(:internal_deleted, priority, subpriority)
+    el, pl, sl = delete_entry(last)
+    if i != last
+      set_entry(i, el, pl, sl)
+      el.send(:index=, i)
+      mm_downheap(i, upper)
+    end
+    self.size
+  end
+
+  def mm_heapify(heapsize=0, upper)
+    # compare number of data movements in worst case.
+    # choose a way for less data movements.
+    #
+    #   current size = ary.size / ARY_SLICE_SIZE = n
+    #   addition size = n - heapsize = m
+    #   heap tree height = Math.log2(n+1) = h
+    #
+    # worst data movements using mm_downheap:
+    # - bottom elements cannot move.
+    # - elements above can move 1 time.
+    # - ...
+    # - top element can move h-1 times.
+    #
+    #   1*2**(h-2) + 2*2**(h-3) + 3*2**(h-4) + ... + (h-1)*2**0
+    #   = sum i*2**(h-1-i), i=1 to h-1
+    #   = 2**h - h - 1
+    #   = n - h
+    #
+    # worst data movements using mm_upheap
+    # - bottom elements can move h-1 times.
+    # - n/2 elements are placed at bottom.
+    # - approximate all elements are at bottom...
+    #
+    #   (h-1) * m
+    #
+    # condition to use mm_downheap:
+    #
+    #   n - h < (h-1) * m
+    #   n - 1 < (h-1) * (m+1)
+    #
+    currentsize = self.size
+    h = Math.log(currentsize+1)/Math.log(2)
+    if currentsize - 1 < (h - 1) * (currentsize - heapsize + 1)
+      n = (currentsize - 2) / 2
+      n.downto(0) {|i|
+        mm_downheap(i, upper)
+      }
+    else
+      heapsize.upto(currentsize-1) {|i|
+        mm_upheap(i, upper)
       }
     end
+    currentsize
+  end
 
-    def upheap_maxside(q, ary, i, range)
-      travel(q, ary, i, range, true) {|j|
-        if root?(j)
-          nil
-        elsif !range.include?(k = parent_maxside(j))
-          nil
-        else
-          if pcmp(q, ary, k, j) < 0
-            k
-          else
-            nil
-          end
-        end
-      }
+  ## min-heap implementation
+
+  def min_compare(priority1, subpriority1, priority2, subpriority2)
+    compare_priority(priority1, priority2).nonzero? or
+    (subpriority1 <=> subpriority2)
+  end
+
+  def min_upper?(i, j)
+    ei, pi, si = get_entry(i)
+    ej, pj, sj = get_entry(j)
+    min_compare(pi, si, pj, sj) <= 0
+  end
+
+  def min_update_prio(loc, priority, subpriority)
+    i = loc.send(:index)
+    ei, pi, si = get_entry(i)
+    set_entry(i, ei, priority, subpriority)
+    cmp = min_compare(pi, si, priority, subpriority)
+    if cmp < 0
+      # loc.priority < priority
+      mm_downheap(i, method(:min_upper?))
+    elsif cmp > 0
+      # loc.priority > priority
+      mm_upheap(i, method(:min_upper?))
     end
+  end
 
-    def downheap_minside(q, ary, i, range)
-      travel(q, ary, i, range, true) {|j|
-        k1 = child1_minside(j)
-        k2 = child2_minside(j)
-        if !range.include?(k1)
-          nil
-        else
-          if !range.include?(k2)
-            k = k1
-          else
-            if (pc = pcmp(q, ary, k1, k2)) < 0
-              k = k1
-            elsif pc > 0
-              k = k2
-            elsif (sc = scmp(q, ary, k1, k2)) <= 0
-              k = k1
-            else
-              k = k2
-            end
-          end
-          if (pc = pcmp(q, ary, k, j)) < 0
-            k
-          else
-            nil
-          end
-        end
-      }
+  def min_delete_loc(loc)
+    mm_delete_loc loc, method(:min_upper?)
+  end
+
+  def min_heapify(heapsize=0)
+    mm_heapify heapsize, method(:min_upper?)
+  end
+
+  alias min_find_min_loc mm_find_top_loc
+
+  MinMode = {
+    :update_prio => :min_update_prio,
+    :delete_loc => :min_delete_loc,
+    :heapify => :min_heapify,
+    :find_min_loc => :min_find_min_loc
+  }
+
+  ## max-heap implementation
+
+  def max_compare(priority1, subpriority1, priority2, subpriority2)
+    compare_priority(priority1, priority2).nonzero? or
+    (subpriority2 <=> subpriority1)
+  end
+
+  def max_upper?(i, j)
+    ei, pi, si = get_entry(i)
+    ej, pj, sj = get_entry(j)
+    max_compare(pi, si, pj, sj) >= 0
+  end
+
+  def max_update_prio(loc, priority, subpriority)
+    i = loc.send(:index)
+    ei, pi, si = get_entry(i)
+    set_entry(i, ei, priority, subpriority)
+    cmp = max_compare(pi, si, priority, subpriority)
+    if cmp < 0
+      # loc.priority < priority
+      mm_upheap(i, method(:max_upper?))
+    elsif cmp > 0
+      # loc.priority > priority
+      mm_downheap(i, method(:max_upper?))
     end
+  end
 
-    def downheap_maxside(q, ary, i, range)
-      travel(q, ary, i, range, true) {|j|
-        k1 = child1_maxside(j)
-        k2 = child2_maxside(j)
-        k1 = minside(k1) if range.include?(k1) && psame(q, ary, k1)
-        k2 = minside(k2) if range.include?(k2) && psame(q, ary, k2)
-        if !range.include?(k1)
-          nil
-        else
-          if !range.include?(k2)
-            k = k1
-          else
-            if (pc = pcmp(q, ary, k1, k2)) < 0
-              k = k2
-            elsif pc > 0
-              k = k1
-            elsif (sc = scmp(q, ary, k1, k2)) <= 0
-              k = k1
-            else
-              k = k2
-            end
-          end
-          if (pc = pcmp(q, ary, k, j)) > 0
-            swap(ary, minside(k), maxside(k)) if minside?(k)
-            maxside(k)
-          else
-            nil
+  def max_delete_loc(loc)
+    mm_delete_loc loc, method(:max_upper?)
+  end
+
+  def max_heapify(heapsize=0)
+    mm_heapify heapsize, method(:max_upper?)
+  end
+
+  alias max_find_max_loc mm_find_top_loc
+
+  MaxMode = {
+    :update_prio => :max_update_prio,
+    :delete_loc => :max_delete_loc,
+    :heapify => :max_heapify,
+    :find_max_loc => :max_find_max_loc
+  }
+
+  ## interval-heap implementation
+
+  def itv_root?(i) i < 2 end
+  def itv_minside?(i) i.even? end
+  def itv_maxside?(i) i.odd? end
+  def itv_minside(i) i & ~1 end
+  def itv_maxside(i) i | 1 end
+  def itv_parent_minside(j) (j-2)/2 & ~1 end
+  def itv_parent_maxside(j) (j-2)/2 | 1 end
+  def itv_child1_minside(i) i &= ~1; (i*2+2) & ~1 end
+  def itv_child1_maxside(i) i &= ~1; (i*2+2) | 1 end
+  def itv_child2_minside(i) i &= ~1; (i*2+4) & ~1 end
+  def itv_child2_maxside(i) i &= ~1; (i*2+4) | 1 end
+
+  def pcmp(i, j)
+    ei, pi, si = get_entry(i)
+    ej, pj, sj = get_entry(j)
+    compare_priority(pi, pj)
+  end
+
+  def scmp(i, j)
+    ei, pi, si = get_entry(i)
+    ej, pj, sj = get_entry(j)
+    si <=> sj
+  end
+
+  def itv_psame(i)
+    pcmp(itv_minside(i), itv_maxside(i)) == 0
+  end
+
+  def itv_travel(i, range, fix_subpriority)
+    while true
+      j = yield i
+      return i if !j
+      swap i, j
+      if fix_subpriority
+        imin = itv_minside(i)
+        imax = itv_maxside(i)
+        if range.include?(imin) && range.include?(imax)
+          if pcmp(imin, imax) == 0 && scmp(imin, imax) > 0
+            swap imin, imax
           end
         end
-      }
+      end
+      i = j
     end
+  end
 
-    def upheap_sub(q, ary, i, range)
-      travel(q, ary, i, range, false) {|j|
-        k = nil
-        if minside?(j)
-          if range.include?(kk=parent_maxside(j)) && pcmp(q, ary, j, kk) == 0
-            k = kk
-          elsif range.include?(kk=parent_minside(j)) && pcmp(q, ary, j, kk) == 0
-            k = kk
-          end
-        else
-          if range.include?(kk=minside(j)) && pcmp(q, ary, j, kk) == 0
-            k = kk
-          elsif range.include?(kk=parent_maxside(j)) && pcmp(q, ary, j, kk) == 0
-            k = kk
-          end
-        end
-        if !k
-          nil
-        elsif scmp(q, ary, k, j) > 0
+  def itv_upheap_minside(i, range)
+    itv_travel(i, range, true) {|j|
+      if itv_root?(j)
+        nil
+      elsif !range.include?(k = itv_parent_minside(j))
+        nil
+      else
+        if pcmp(k, j) > 0
+          swap(itv_minside(k), itv_maxside(k)) if itv_psame(k)
           k
         else
           nil
         end
-      }
-    end
+      end
+    }
+  end
 
-    def downheap_sub(q, ary, i, range)
-      travel(q, ary, i, range, false) {|j|
-        k1 = k2 = nil
-        if minside?(j)
-          if range.include?(kk=maxside(j)) && pcmp(q, ary, j, kk) == 0
-            k1 = kk
-          else
-            k1 = kk if range.include?(kk=child1_minside(j)) && pcmp(q, ary, j, kk) == 0
-            k2 = kk if range.include?(kk=child2_minside(j)) && pcmp(q, ary, j, kk) == 0
-          end
-        else
-          if range.include?(kk=child1_minside(j)) && pcmp(q, ary, j, kk) == 0
-            k1 = kk
-          elsif range.include?(kk=child1_maxside(j)) && pcmp(q, ary, j, kk) == 0
-            k1 = kk
-          end
-          if range.include?(kk=child2_minside(j)) && pcmp(q, ary, j, kk) == 0
-            k2 = kk
-          elsif range.include?(kk=child2_maxside(j)) && pcmp(q, ary, j, kk) == 0
-            k2 = kk
-          end
-        end
-        if k1 && k2
-          k = scmp(q, ary, k1, k2) > 0 ? k2 : k1
-        else
-          k = k1 || k2
-        end
-        if k && scmp(q, ary, k, j) < 0
+  def itv_upheap_maxside(i, range)
+    itv_travel(i, range, true) {|j|
+      if itv_root?(j)
+        nil
+      elsif !range.include?(k = itv_parent_maxside(j))
+        nil
+      else
+        if pcmp(k, j) < 0
           k
         else
           nil
         end
-      }
-    end
+      end
+    }
+  end
 
-    def adjust(q, ary, i, range)
-      if minside?(i)
-        j = upheap_minside(q, ary, i, range)
-        if i == j
-          i = downheap_minside(q, ary, i, range)
-          if !range.include?(child1_minside(i)) && range.include?(j=maxside(i)) && pcmp(q, ary, i, j) > 0
-            swap(ary, i, j)
+  def itv_downheap_minside(i, range)
+    itv_travel(i, range, true) {|j|
+      k1 = itv_child1_minside(j)
+      k2 = itv_child2_minside(j)
+      if !range.include?(k1)
+        nil
+      else
+        if !range.include?(k2)
+          k = k1
+        else
+          if (pc = pcmp(k1, k2)) < 0
+            k = k1
+          elsif pc > 0
+            k = k2
+          elsif (sc = scmp(k1, k2)) <= 0
+            k = k1
+          else
+            k = k2
+          end
+        end
+        if (pc = pcmp(k, j)) < 0
+          k
+        else
+          nil
+        end
+      end
+    }
+  end
+
+  def itv_downheap_maxside(i, range)
+    itv_travel(i, range, true) {|j|
+      k1 = itv_child1_maxside(j)
+      k2 = itv_child2_maxside(j)
+      k1 = itv_minside(k1) if range.include?(k1) && itv_psame(k1)
+      k2 = itv_minside(k2) if range.include?(k2) && itv_psame(k2)
+      if !range.include?(k1)
+        nil
+      else
+        if !range.include?(k2)
+          k = k1
+        else
+          if (pc = pcmp(k1, k2)) < 0
+            k = k2
+          elsif pc > 0
+            k = k1
+          elsif (sc = scmp(k1, k2)) <= 0
+            k = k1
+          else
+            k = k2
+          end
+        end
+        if (pc = pcmp(k, j)) > 0
+          swap(itv_minside(k), itv_maxside(k)) if itv_minside?(k)
+          itv_maxside(k)
+        else
+          nil
+        end
+      end
+    }
+  end
+
+  def itv_upheap_sub(i, range)
+    itv_travel(i, range, false) {|j|
+      k = nil
+      if itv_minside?(j)
+        if range.include?(kk=itv_parent_maxside(j)) && pcmp(j, kk) == 0
+          k = kk
+        elsif range.include?(kk=itv_parent_minside(j)) && pcmp(j, kk) == 0
+          k = kk
+        end
+      else
+        if range.include?(kk=itv_minside(j)) && pcmp(j, kk) == 0
+          k = kk
+        elsif range.include?(kk=itv_parent_maxside(j)) && pcmp(j, kk) == 0
+          k = kk
+        end
+      end
+      if !k
+        nil
+      elsif scmp(k, j) > 0
+        k
+      else
+        nil
+      end
+    }
+  end
+
+  def itv_downheap_sub(i, range)
+    itv_travel(i, range, false) {|j|
+      k1 = k2 = nil
+      if itv_minside?(j)
+        if range.include?(kk=itv_maxside(j)) && pcmp(j, kk) == 0
+          k1 = kk
+        else
+          k1 = kk if range.include?(kk=itv_child1_minside(j)) && pcmp(j, kk) == 0
+          k2 = kk if range.include?(kk=itv_child2_minside(j)) && pcmp(j, kk) == 0
+        end
+      else
+        if range.include?(kk=itv_child1_minside(j)) && pcmp(j, kk) == 0
+          k1 = kk
+        elsif range.include?(kk=itv_child1_maxside(j)) && pcmp(j, kk) == 0
+          k1 = kk
+        end
+        if range.include?(kk=itv_child2_minside(j)) && pcmp(j, kk) == 0
+          k2 = kk
+        elsif range.include?(kk=itv_child2_maxside(j)) && pcmp(j, kk) == 0
+          k2 = kk
+        end
+      end
+      if k1 && k2
+        k = scmp(k1, k2) > 0 ? k2 : k1
+      else
+        k = k1 || k2
+      end
+      if k && scmp(k, j) < 0
+        k
+      else
+        nil
+      end
+    }
+  end
+
+  def itv_adjust(i, range)
+    if itv_minside?(i)
+      j = itv_upheap_minside(i, range)
+      if i == j
+        i = itv_downheap_minside(i, range)
+        if !range.include?(itv_child1_minside(i)) && range.include?(j=itv_maxside(i)) && pcmp(i, j) > 0
+          swap(i, j)
+          i = j
+        end
+        if itv_maxside?(i) || !range.include?(itv_maxside(i))
+          i = itv_upheap_maxside(i, range)
+        end
+      end
+    else
+      j = itv_upheap_maxside(i, range)
+      if i == j
+        i = itv_downheap_maxside(i, range)
+        if !range.include?(itv_child1_maxside(i))
+          if range.include?(j=itv_child1_minside(i)) && pcmp(j, i) > 0
+            swap(i, j)
+            i = j
+          elsif range.include?(j=itv_minside(i)) && pcmp(j, i) > 0
+            swap(i, j)
             i = j
           end
-          if maxside?(i) || !range.include?(maxside(i))
-            i = upheap_maxside(q, ary, i, range)
-          end
         end
-      else
-        j = upheap_maxside(q, ary, i, range)
-        if i == j
-          i = downheap_maxside(q, ary, i, range)
-          if !range.include?(child1_maxside(i))
-            if range.include?(j=child1_minside(i)) && pcmp(q, ary, j, i) > 0
-              swap(ary, i, j)
-              i = j
-            elsif range.include?(j=minside(i)) && pcmp(q, ary, j, i) > 0
-              swap(ary, i, j)
-              i = j
-            end
-          end
-          if minside?(i)
-            i = upheap_minside(q, ary, i, range)
-          end
+        if itv_minside?(i)
+          i = itv_upheap_minside(i, range)
         end
       end
-      i = upheap_sub(q, ary, i, range)
-      downheap_sub(q, ary, i, range)
     end
+    i = itv_upheap_sub(i, range)
+    itv_downheap_sub(i, range)
+  end
 
-    def update_prio(q, ary, loc, prio, subprio)
-      i = loc.send(:index)
-      ei, pi, si = get_entry(ary, i)
-      set_entry(ary, i, ei, prio, subprio)
-      range = 0...size(ary)
-      adjust(q, ary, i, range)
+  def itv_update_prio(loc, prio, subprio)
+    i = loc.send(:index)
+    ei, pi, si = get_entry(i)
+    set_entry(i, ei, prio, subprio)
+    range = 0...self.size
+    itv_adjust(i, range)
+  end
+
+  def itv_heapify(heapsize=0)
+    currentsize = self.size
+    h = Math.log(currentsize+1)/Math.log(2)
+    if currentsize - 1 < (h - 1) * (currentsize - heapsize + 1)
+      (currentsize-1).downto(0) {|i|
+        itv_adjust(i, i...currentsize)
+      }
+    else
+      heapsize.upto(currentsize-1) {|i|
+        itv_adjust(i, 0...(i+1))
+      }
     end
+    currentsize
+  end
 
-    def heapify(q, ary, heapsize=0)
-      currentsize = size(ary)
-      h = Math.log(currentsize+1)/Math.log(2)
-      if currentsize - 1 < (h - 1) * (currentsize - heapsize + 1)
-        (currentsize-1).downto(0) {|i|
-          adjust(q, ary, i, i...currentsize)
-        }
-      else
-        heapsize.upto(currentsize-1) {|i|
-          adjust(q, ary, i, 0...(i+1))
-        }
-      end
-      currentsize
-    end
-
-    def find_minmax_loc(q, ary)
-      case size(ary)
-      when 0
-        [nil, nil]
-      when 1
-        e0, p0, s0 = get_entry(ary, 0)
+  def itv_find_minmax_loc
+    case self.size
+    when 0
+      [nil, nil]
+    when 1
+      e0, p0, s0 = get_entry(0)
+      [e0, e0]
+    else
+      if pcmp(0, 1) == 0
+        e0, p0, s0 = get_entry(0)
         [e0, e0]
       else
-        if pcmp(q, ary, 0, 1) == 0
-          e0, p0, s0 = get_entry(ary, 0)
-          [e0, e0]
-        else
-          e0, p0, s0 = get_entry(ary, 0)
-          e1, p1, s1 = get_entry(ary, 1)
-          [e0, e1]
-        end
+        e0, p0, s0 = get_entry(0)
+        e1, p1, s1 = get_entry(1)
+        [e0, e1]
       end
-    end
-
-    def find_min_loc(q, ary)
-      find_minmax_loc(q, ary).first
-    end
-
-    def find_max_loc(q, ary)
-      find_minmax_loc(q, ary).last
-    end
-
-    def delete_loc(q, ary, loc)
-      i = loc.send(:index)
-      _, priority, subpriority = get_entry(ary, i)
-      last = size(ary) - 1
-      loc.send(:internal_deleted, priority, subpriority)
-      el, pl, sl = delete_entry(ary, last)
-      if i != last
-        set_entry(ary, i, el, pl, sl)
-        el.send(:index=, i)
-        adjust(q, ary, i, 0...last)
-      end
-      size(ary)
     end
   end
+
+  def itv_find_min_loc
+    itv_find_minmax_loc.first
+  end
+
+  def itv_find_max_loc
+    itv_find_minmax_loc.last
+  end
+
+  def itv_delete_loc(loc)
+    i = loc.send(:index)
+    _, priority, subpriority = get_entry(i)
+    last = self.size - 1
+    loc.send(:internal_deleted, priority, subpriority)
+    el, pl, sl = delete_entry(last)
+    if i != last
+      set_entry(i, el, pl, sl)
+      el.send(:index=, i)
+      itv_adjust(i, 0...last)
+    end
+    self.size
+  end
+
+  IntervalMode = {
+    :update_prio => :itv_update_prio,
+    :heapify => :itv_heapify,
+    :find_minmax_loc => :itv_find_minmax_loc,
+    :find_min_loc => :itv_find_min_loc,
+    :find_max_loc => :itv_find_max_loc,
+    :delete_loc => :itv_delete_loc
+  }
 
   # :startdoc:
 end

@@ -28,50 +28,59 @@ require './depq'
 require 'test/unit'
 
 class Depq
-  module SimpleHeap
-    def validation(q, ary)
-      0.upto(size(ary)-1) {|i|
-        _, x = get_entry(ary, i)
-        j = i*2+1
-        k = i*2+2
-        if j < size(ary) && !upper?(q, ary, i, j)
-          _, y = get_entry(ary, j)
-          raise "wrong binary heap: pri[#{i}]=#{x.inspect} > #{y.inspect}=pri[#{j}]"
-        end
-        if k < size(ary) && !upper?(q, ary, i, k)
-          _, z = get_entry(ary, k)
-          raise "wrong binary heap: pri[#{i}]=#{x.inspect} > #{z.inspect}=pri[#{k}]"
-        end
-      }
-    end
-  end
-
-  def IntervalHeap.validation(q, ary)
-    range=0...size(ary)
-    range.each {|j|
-      imin = parent_minside(j)
-      imax = parent_maxside(j)
-      jmin = minside(j)
-      if minside?(j) && range.include?(imin) && pcmp(q, ary, imin, j) > 0
-        raise "ary[#{imin}].priority > ary[#{j}].priority "
+  def mm_validation(&upper)
+    0.upto(self.size-1) {|i|
+      _, x = get_entry(i)
+      j = i*2+1
+      k = i*2+2
+      if j < self.size && !upper.call(i, j)
+        _, y = get_entry(j)
+        raise "wrong binary heap: pri[#{i}]=#{x.inspect} > #{y.inspect}=pri[#{j}]"
       end
-      if maxside?(j) && range.include?(imax) && pcmp(q, ary, imax, j) < 0
-        raise "ary[#{imax}].priority < ary[#{j}].priority "
-      end
-      if range.include?(imin) && pcmp(q, ary, imin, j) == 0 && scmp(q, ary, imin, j) > 0
-        raise "ary[#{imin}].subpriority < ary[#{j}].subpriority "
-      end
-      if range.include?(imax) && pcmp(q, ary, imax, j) == 0 && scmp(q, ary, imax, j) > 0
-        raise "ary[#{imax}].subpriority < ary[#{j}].subpriority "
-      end
-      if maxside?(j) && range.include?(jmin) && pcmp(q, ary, jmin, j) == 0 && scmp(q, ary, jmin, j) > 0
-        raise "ary[#{jmin}].subpriority < ary[#{j}].subpriority "
+      if k < self.size && !upper.call(i, k)
+        _, z = get_entry(k)
+        raise "wrong binary heap: pri[#{i}]=#{x.inspect} > #{z.inspect}=pri[#{k}]"
       end
     }
   end
 
+  def min_validation
+    mm_validation &method(:min_upper?)
+  end
+  MinMode[:validation] = :min_validation
+
+  def max_validation
+    mm_validation &method(:max_upper?)
+  end
+  MaxMode[:validation] = :max_validation
+
+  def itv_validation
+    range=0...self.size
+    range.each {|j|
+      imin = parent_minside(j)
+      imax = parent_maxside(j)
+      jmin = minside(j)
+      if minside?(j) && range.include?(imin) && pcmp(imin, j) > 0
+        raise "ary[#{imin}].priority > ary[#{j}].priority "
+      end
+      if maxside?(j) && range.include?(imax) && pcmp(imax, j) < 0
+        raise "ary[#{imax}].priority < ary[#{j}].priority "
+      end
+      if range.include?(imin) && pcmp(imin, j) == 0 && scmp(imin, j) > 0
+        raise "ary[#{imin}].subpriority < ary[#{j}].subpriority "
+      end
+      if range.include?(imax) && pcmp(imax, j) == 0 && scmp(imax, j) > 0
+        raise "ary[#{imax}].subpriority < ary[#{j}].subpriority "
+      end
+      if maxside?(j) && range.include?(jmin) && pcmp(jmin, j) == 0 && scmp(jmin, j) > 0
+        raise "ary[#{jmin}].subpriority < ary[#{j}].subpriority "
+      end
+    }
+  end
+  IntervalMode[:validation] = :itv_validation
+
   def validation
-    @mode.validation(self, @ary) if @mode
+    send(@mode[:validation]) if @mode
     if @ary.length % ARY_SLICE_SIZE != 0
       raise "wrong length"
     end
