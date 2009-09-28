@@ -1462,7 +1462,7 @@ class Depq
     self.size
   end
 
-  def mm_heapify(heapsize=0, upper)
+  def mm_heapify(heapsize, upper)
     # compare number of data movements in worst case.
     # choose a way for less data movements.
     #
