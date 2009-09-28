@@ -1,10 +1,9 @@
-# This file is for building http://depq.rubyforge.org/.
-#
-
 RUBY = ruby
 
 test:
 	$(RUBY) -Ilib test/test-depq.rb
+
+# targets for building http://depq.rubyforge.org/.
 
 www:
 	rm -rf www
