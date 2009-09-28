@@ -1,15 +1,15 @@
 Gem::Specification.new do |s|
   s.name = 'depq'
-  s.version = '0.3'
+  s.version = '0.4'
   s.date = '2009-09-23'
   s.author = 'Tanaka Akira'
   s.email = 'akr@fsij.org'
-  s.files = %w[README depq.rb]
-  s.test_files = %w[test-depq.rb]
+  s.files = %w[README lib/depq.rb]
+  s.test_files = %w[test/test-depq.rb]
   s.has_rdoc = true
   s.homepage = 'http://depq.rubyforge.org/'
   s.rubyforge_project = 'depq'
-  s.require_path = '.'
+  s.require_path = 'lib'
   s.summary = 'Stable Double-Ended Priority Queue.'
   s.description = <<'End'
 depq is a Double-Ended Priority Queue library.

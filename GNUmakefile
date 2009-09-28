@@ -1,6 +1,11 @@
 # This file is for building http://depq.rubyforge.org/.
 #
 
+RUBY = ruby
+
+test:
+	$(RUBY) -Ilib test/test-depq.rb
+
 www:
 	rm -rf www
 	mkdir www
@@ -11,4 +16,4 @@ www-upload:
 	scp -r www/. rubyforge.org:/var/www/gforge-projects/depq/
 	echo http://depq.rubyforge.org/
 
-.PHONY: www www-upload
+.PHONY: test www www-upload
