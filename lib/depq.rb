@@ -473,14 +473,19 @@ class Depq
   end
   private :each_entry
 
+  def mode_call(name, *args)
+    send(Mode[@mode][name], *args)
+  end
+  private :mode_call
+
   def use_min
     if @mode == :min || @mode == :interval
       if @heapsize < self.size
-        @heapsize = send(Mode[@mode][:heapify], @heapsize)
+        @heapsize = mode_call(:heapify, @heapsize)
       end
     else
       @mode = :min
-      @heapsize = send(Mode[@mode][:heapify])
+      @heapsize = mode_call(:heapify)
     end
   end
   private :use_min
@@ -488,11 +493,11 @@ class Depq
   def use_max
     if @mode == :max || @mode == :interval
       if @heapsize < self.size
-        @heapsize = send(Mode[@mode][:heapify], @heapsize)
+        @heapsize = mode_call(:heapify, @heapsize)
       end
     else
       @mode = :max
-      @heapsize = send(Mode[@mode][:heapify])
+      @heapsize = mode_call(:heapify)
     end
   end
   private :use_max
@@ -500,18 +505,18 @@ class Depq
   def use_minmax
     if @mode == :interval
       if @heapsize < self.size
-        @heapsize = send(Mode[@mode][:heapify], @heapsize)
+        @heapsize = mode_call(:heapify, @heapsize)
       end
     else
       @mode = :interval
-      @heapsize = send(Mode[@mode][:heapify])
+      @heapsize = mode_call(:heapify)
     end
   end
   private :use_minmax
 
   def mode_heapify
     if @mode
-      @heapsize = send(Mode[@mode][:heapify])
+      @heapsize = mode_call(:heapify)
     end
   end
   private :mode_heapify
@@ -683,7 +688,7 @@ class Depq
       set_entry(loc.send(:index), loc, priority, subpriority)
     else
       mode_heapify
-      send(Mode[@mode][:update_prio], loc, priority, subpriority)
+      mode_call(:update_prio, loc, priority, subpriority)
     end
   end
   private :internal_set_priority
@@ -793,7 +798,7 @@ class Depq
   def find_min_locator
     return nil if empty?
     use_min
-    send(Mode[@mode][:find_min_loc])
+    mode_call(:find_min_loc)
   end
 
   # return the minimum value with its priority.
@@ -857,7 +862,7 @@ class Depq
   def find_max_locator
     return nil if empty?
     use_max
-    send(Mode[@mode][:find_max_loc])
+    mode_call(:find_max_loc)
   end
 
   # return the maximum value with its priority.
@@ -915,7 +920,7 @@ class Depq
   def find_minmax_locator
     return [nil, nil] if empty?
     use_minmax
-    return send(Mode[@mode][:find_minmax_loc])
+    return mode_call(:find_minmax_loc)
   end
 
   # returns the minimum and maximum value as a two-element array.
@@ -957,7 +962,7 @@ class Depq
       loc
     else
       mode_heapify
-      @heapsize = send(Mode[@mode][:delete_loc], loc)
+      @heapsize = mode_call(:delete_loc, loc)
       loc
     end
   end
@@ -979,8 +984,8 @@ class Depq
   def delete_min_locator
     return nil if empty?
     use_min
-    loc = send(Mode[@mode][:find_min_loc])
-    @heapsize = send(Mode[@mode][:delete_loc], loc)
+    loc = mode_call(:find_min_loc)
+    @heapsize = mode_call(:delete_loc, loc)
     loc
   end
 
@@ -1044,8 +1049,8 @@ class Depq
   def delete_max_locator
     return nil if empty?
     use_max
-    loc = send(Mode[@mode][:find_max_loc])
-    @heapsize = send(Mode[@mode][:delete_loc], loc)
+    loc = mode_call(:find_max_loc)
+    @heapsize = mode_call(:delete_loc, loc)
     loc
   end
 
