@@ -80,7 +80,7 @@ class Depq
   IntervalMode[:validation] = :itv_validation
 
   def validation
-    send(@mode[:validation]) if @mode
+    send(Mode[@mode][:validation]) if @mode
     if @ary.length % ARY_SLICE_SIZE != 0
       raise "wrong length"
     end
