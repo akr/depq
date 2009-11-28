@@ -1,10 +1,10 @@
 # depq.rb - Double-Ended Priority Queue.
 #
 # Copyright (C) 2009 Tanaka Akira  <akr@fsij.org>
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 #  1. Redistributions of source code must retain the above copyright notice, this
 #     list of conditions and the following disclaimer.
 #  2. Redistributions in binary form must reproduce the above copyright notice,
@@ -12,7 +12,7 @@
 #     and/or other materials provided with the distribution.
 #  3. The name of the author may not be used to endorse or promote products
 #     derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
 # WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
@@ -420,9 +420,9 @@ class Depq
   #   class Cmp
   #     def call(a,b) a.casecmp(b) end
   #   end
-  #   q = Depq.new(Cmp.new)                         
-  #   q.insert "Foo"            
-  #   q.insert "bar"            
+  #   q = Depq.new(Cmp.new)
+  #   q.insert "Foo"
+  #   q.insert "bar"
   #   p q.delete_min   #=> "bar"
   #   p q.delete_min   #=> "Foo"
   #
@@ -785,12 +785,12 @@ class Depq
   #
   # This method doesn't delete the element from the queue.
   #
-  #   q = Depq.new 
-  #   p q.find_min_locator     #=> nil 
-  #   q.insert 3 
-  #   q.insert 1 
-  #   q.insert 2 
-  #   p q.find_min_locator     #=> #<Depq::Locator: 1> 
+  #   q = Depq.new
+  #   p q.find_min_locator     #=> nil
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.find_min_locator     #=> #<Depq::Locator: 1>
   #   p q.find_min_locator     #=> #<Depq::Locator: 1>
   #   p q.delete_min           #=> 1
   #   p q.find_min_locator     #=> #<Depq::Locator: 2>
@@ -827,12 +827,12 @@ class Depq
   #
   # This method doesn't delete the element from the queue.
   #
-  #   q = Depq.new 
-  #   p q.find_min     #=> nil 
-  #   q.insert 3 
-  #   q.insert 1 
-  #   q.insert 2 
-  #   p q.find_min     #=> 1 
+  #   q = Depq.new
+  #   p q.find_min     #=> nil
+  #   q.insert 3
+  #   q.insert 1
+  #   q.insert 2
+  #   p q.find_min     #=> 1
   #   p q.find_min     #=> 1
   #   p q.delete_min   #=> 1
   #   p q.find_min     #=> 2
@@ -1173,7 +1173,7 @@ class Depq
   #   q.insert 4
   #   q.insert 3
   #   p q.min           #=> 2
-  #   q.replace_min(5) 
+  #   q.replace_min(5)
   #   p q.delete_min    #=> 3
   #   p q.delete_min    #=> 4
   #   p q.delete_min    #=> 5

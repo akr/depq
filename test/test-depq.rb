@@ -1,10 +1,10 @@
 # test-depq.rb - test for depq.rb
 #
 # Copyright (C) 2009 Tanaka Akira  <akr@fsij.org>
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 #  1. Redistributions of source code must retain the above copyright notice, this
 #     list of conditions and the following disclaimer.
 #  2. Redistributions in binary form must reproduce the above copyright notice,
@@ -12,7 +12,7 @@
 #     and/or other materials provided with the distribution.
 #  3. The name of the author may not be used to endorse or promote products
 #     derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
 # WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
@@ -92,7 +92,7 @@ class Depq
       if loc.send(:index) != i
         raise "index mismatch"
       end
-      unless self.equal? loc.depq 
+      unless self.equal? loc.depq
         raise "depq mismatch"
       end
       i += 1
@@ -401,13 +401,13 @@ class TestDepq < Test::Unit::TestCase
      q.insert "bar"
      assert_equal("Foo", q.delete_min)
      assert_equal("bar", q.delete_min)
-  
+
      q = Depq.new(:casecmp)
      q.insert "Foo"
      q.insert "bar"
      assert_equal("bar", q.delete_min)
      assert_equal("Foo", q.delete_min)
-  
+
      q = Depq.new(lambda {|a,b| a.casecmp(b) })
      q.insert "Foo"
      q.insert "bar"
