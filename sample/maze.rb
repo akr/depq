@@ -87,6 +87,9 @@ path.each {|x,y|
   MAZE[y][x] = '*'
 }
 
+MAZE[START[1]][START[0]] = 'S'
+MAZE[GOAL[1]][GOAL[0]] = 'G'
+
 MAZE.each {|line|
   puts line.join('')
 }
