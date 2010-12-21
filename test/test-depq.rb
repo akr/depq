@@ -1030,6 +1030,9 @@ class TestDepq < Test::Unit::TestCase
     a = Depq.nlargest(3, [5, 1, 3, 2, 4, 6, 7])
     assert_equal([5, 6, 7], a)
 
+    a = Depq.nlargest(3, [5, 1, 3, 2, 4, 6, 7]) {|e| -e }
+    assert_equal([3, 2, 1], a)
+
     assert_equal([1,2], Depq.nlargest(3, [1,2]))
 
     a = []
@@ -1041,6 +1044,9 @@ class TestDepq < Test::Unit::TestCase
   def test_nsmallest
     a = Depq.nsmallest(5, [5, 2, 3, 1, 4, 6, 7])
     assert_equal([1, 2, 3, 4, 5], a)
+
+    a = Depq.nsmallest(5, [5, 2, 3, 1, 4, 6, 7]) {|e| -e }
+    assert_equal([7, 6, 5, 4, 3], a)
 
     assert_equal([1,2], Depq.nsmallest(3, [1,2]))
 

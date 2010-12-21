@@ -1275,34 +1275,46 @@ class Depq
     nil
   end
 
+  # :call-seq:
+  #   Depq.nlargest(n, iter)
+  #   Depq.nlargest(n, iter) {|e| order }
+  #
   # returns the largest n elements in iter as an array.
   #
   # The result array is ordered from the minimum element.
   #
   #   p Depq.nlargest(3, [5, 2, 3, 1, 4, 6, 7]) #=> [5, 6, 7]
   #
+  # If the block is given, the elements are compared by
+  # the block values.
+  #
   def Depq.nlargest(n, iter)
     limit = (n * Math.log(1+n)).ceil
     limit = 1024 if limit < 1024
     q = Depq.new
     threshold = nil
-    iter.each {|v|
+    iter.each {|e|
+      if block_given?
+        v = yield e
+      else
+        v = e
+      end
       if q.size < n
         if q.size == 0
           threshold = v
         else
           threshold = v if (v <=> threshold) < 0
         end
-        q.insert v
+        q.insert e, v
       else
         if (v <=> threshold) > 0
-          q.insert v
+          q.insert e, v
           if limit < q.size
             tmp = []
-            n.times { tmp << q.delete_max }
+            n.times { tmp << q.delete_max_priority }
             q.clear
-            q.insert_all tmp
-            threshold = tmp.last
+            tmp.each {|elt, prio| q.insert elt, prio }
+            threshold = tmp.last[1]
           end
         end
       end
@@ -1314,34 +1326,46 @@ class Depq
     a
   end
 
+  # :call-seq:
+  #   Depq.nsmallest(n, iter)
+  #   Depq.nsmallest(n, iter) {|e| order }
+  #
   # returns the smallest n elements in iter as an array.
   #
   # The result array is ordered from the minimum element.
   #
   #   p Depq.nsmallest(5, [5, 2, 3, 1, 4, 6, 7]) #=> [1, 2, 3, 4, 5]
   #
+  # If the block is given, the elements are compared by
+  # the block values.
+  #
   def Depq.nsmallest(n, iter)
     limit = (n * Math.log(1+n)).ceil
     limit = 1024 if limit < 1024
     q = Depq.new
     threshold = nil
-    iter.each {|v|
+    iter.each {|e|
+      if block_given?
+        v = yield e
+      else
+        v = e
+      end
       if q.size < n
         if q.size == 0
           threshold = v
         else
           threshold = v if (v <=> threshold) > 0
         end
-        q.insert v
+        q.insert e, v
       else
         if (v <=> threshold) < 0
-          q.insert v
+          q.insert e, v
           if limit < q.size
             tmp = []
-            n.times { tmp << q.delete_min }
+            n.times { tmp << q.delete_min_priority }
             q.clear
-            q.insert_all tmp
-            threshold = tmp.last
+            tmp.each {|elt, prio| q.insert elt, prio }
+            threshold = tmp.last[1]
           end
         end
       end
