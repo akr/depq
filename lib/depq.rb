@@ -1311,10 +1311,10 @@ class Depq
           q.insert e, v
           if limit < q.size
             tmp = []
-            n.times { tmp << q.delete_max_priority }
+            n.times { tmp << q.delete_max_locator }
             q.clear
-            tmp.each {|elt, prio| q.insert elt, prio }
-            threshold = tmp.last[1]
+            tmp.each {|loc| q.insert_locator loc }
+            threshold = tmp.last.priority
           end
         end
       end
@@ -1362,10 +1362,10 @@ class Depq
           q.insert e, v
           if limit < q.size
             tmp = []
-            n.times { tmp << q.delete_min_priority }
+            n.times { tmp << q.delete_min_locator }
             q.clear
-            tmp.each {|elt, prio| q.insert elt, prio }
-            threshold = tmp.last[1]
+            tmp.each {|loc| q.insert_locator loc }
+            threshold = tmp.last.priority
           end
         end
       end
