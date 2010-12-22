@@ -1286,7 +1286,9 @@ class Depq
   #   p Depq.nlargest(3, [5, 2, 3, 1, 4, 6, 7]) #=> [5, 6, 7]
   #
   # If the block is given, the elements are compared by
-  # the block values.
+  # the corresponding block values.
+  #
+  #   p Depq.nlargest(3, [5, 2, 3, 1, 4, 6, 7]) {|e| -e } #=> [3, 2, 1]
   #
   def Depq.nlargest(n, iter)
     limit = (n * Math.log(1+n)).ceil
@@ -1337,7 +1339,9 @@ class Depq
   #   p Depq.nsmallest(5, [5, 2, 3, 1, 4, 6, 7]) #=> [1, 2, 3, 4, 5]
   #
   # If the block is given, the elements are compared by
-  # the block values.
+  # the corresnponding block values.
+  #
+  #   p Depq.nsmallest(5, [5, 2, 3, 1, 4, 6, 7]) {|e| -e } #=> [7, 6, 5, 4, 3]
   #
   def Depq.nsmallest(n, iter)
     limit = (n * Math.log(1+n)).ceil
