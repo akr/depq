@@ -34,7 +34,7 @@
 # * priority - you can get a value with minimum priority
 # * double-ended - you can get a value with maximum priority too
 # * stable - you will get the value inserted first with minimum/maximum priority
-# * updatable priority - you can change the priority of a value in the queue.  (usable for Dijkstra's shortest path algorithm and various graph algorithms)
+# * updatable priority - you can change the priority of a inserted value.  (usable for Dijkstra's shortest path algorithm and various graph algorithms)
 # * implicit heap - compact heap representation using array.  most operations are O(log n) at worst
 # * iterator operations: nlargest, nsmallest and merge
 #
