@@ -3,7 +3,7 @@
 # needs Ruby 1.9.2 for timeout argument of ConditionVariable#wait.
 #
 # usage:
-#   ruby -I. sample/sched.rb
+#   ruby -Ilib sample/sched.rb
 
 require 'depq'
 require 'thread'

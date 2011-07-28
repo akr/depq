@@ -5,7 +5,7 @@
 # http://en.wikipedia.org/wiki/Kruskal's_algorithm
 #
 # usage:
-#   ruby -I. sample/kruskal.rb
+#   ruby -Ilib sample/kruskal.rb
 
 require 'depq'
 

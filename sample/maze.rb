@@ -1,7 +1,7 @@
 # solve a maze using A* search algorithm
 #
 # usage:
-#   ruby -Isample -I. sample/maze.rb
+#   ruby -Isample -Ilib sample/maze.rb
 
 require_relative 'astar'
 

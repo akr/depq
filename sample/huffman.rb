@@ -1,7 +1,7 @@
 # Huffman coding
 #
 # usage:
-#   ruby -I. sample/huffman.rb input-file
+#   ruby -Ilib sample/huffman.rb input-file
 
 require 'depq'
 

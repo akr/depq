@@ -1,7 +1,7 @@
 # external quick sort
 #
 # usage:
-#   ruby -I. sample/exqsort.rb input-file
+#   ruby -Ilib sample/exqsort.rb input-file
 
 require 'tmpdir'
 require 'depq'

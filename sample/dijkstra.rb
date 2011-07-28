@@ -1,7 +1,7 @@
 # Dijkstra's single source shortest path finding algorithm
 #
 # usage:
-#   ruby -I. sample/dijkstra.rb
+#   ruby -Ilib sample/dijkstra.rb
 
 require 'depq'
 
