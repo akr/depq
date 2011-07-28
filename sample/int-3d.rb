@@ -25,7 +25,7 @@ def gen1
   }
 end
 
-# sophisticated version
+# faster version
 def gen2
   q = Depq.new
   q.insert [1, 1,1,1]
