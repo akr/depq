@@ -21,7 +21,7 @@ depq is double-ended stable priority queue with priority update operation implem
 * ((<reference manual|URL:http://depq.rubyforge.org/rdoc/classes/Depq.html>))
 * ((<home page on rubyforge|URL:http://depq.rubyforge.org/>))
 * ((<project info on rubyforge|URL:http://rubyforge.org/projects/depq/>))
-* ((<depq on gemcutter|URL:http://gemcutter.org/gems/depq>))
+* ((<depq on rubygems.org|URL:http://rubygems.org/gems/depq>))
 * ((<source repository on github|URL:http://github.com/akr/depq>))
 * ((<raa entry|URL:http://raa.ruby-lang.org/project/depq/>))
 
