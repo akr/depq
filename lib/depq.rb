@@ -952,12 +952,16 @@ class Depq
   #
   def delete_locator(loc)
     check_locator(loc)
-    if @heapsize <= loc.send(:index)
-      _, priority, subpriority = delete_entry(loc.send(:index))
-      loc.send(:index).upto(self.size-1) {|i|
-        loc2, _ = get_entry(i)
-        loc2.send(:index=, i)
-      }
+    index = loc.send(:index)
+    if @heapsize <= index
+      _, priority, subpriority = get_entry(index)
+      last = self.size - 1
+      if index != last
+        loc2, priority2, subpriority2 = get_entry(last)
+        set_entry(index, loc2, priority2, subpriority2)
+        loc2.send(:index=, index)
+      end
+      delete_entry(last)
       loc.send(:internal_deleted, priority, subpriority)
       loc
     else
