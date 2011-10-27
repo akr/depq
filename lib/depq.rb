@@ -1,6 +1,6 @@
 # depq.rb - Double-Ended Priority Queue.
 #
-# Copyright (C) 2009 Tanaka Akira  <akr@fsij.org>
+# Copyright (C) 2009-2011 Tanaka Akira  <akr@fsij.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
