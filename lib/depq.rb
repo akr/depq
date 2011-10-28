@@ -550,13 +550,13 @@ class Depq
   def initialize_copy(obj) # :nodoc:
     if defined? @ary
       @ary = @ary.dup
-      0.step(@ary.length-1, ARY_SLICE_SIZE) {|k|
-        i = k / ARY_SLICE_SIZE
+      n = @ary.length / ARY_SLICE_SIZE
+      k = 0
+      n.times {|i|
         loc1 = @ary[k]
-        priority = @ary[k+1]
-        loc2 = Depq::Locator.new(loc1.value, priority)
-        loc2.send(:internal_inserted, self, i)
+        loc2 = Depq::Locator.new(loc1.value, i, self)
         @ary[k] = loc2
+        k += ARY_SLICE_SIZE
       }
     end
   end
