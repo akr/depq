@@ -694,8 +694,9 @@ class Depq
 
   def internal_set_priority(loc, priority, subpriority)
     check_locator(loc)
-    if @heapsize <= loc.send(:index)
-      set_entry(loc.send(:index), loc, priority, subpriority)
+    index = loc.send(:index)
+    if @heapsize <= index
+      set_entry(index, loc, priority, subpriority)
     else
       mode_heapify
       mode_call(:update_prio, loc, priority, subpriority)
