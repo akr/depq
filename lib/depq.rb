@@ -479,25 +479,37 @@ class Depq
   private :mode_call
 
   def use_min
-    if @mode == :min || @mode == :interval
+    case @mode
+    when :min, :interval
       if @heapsize < self.size
         @heapsize = mode_call(:heapify, @heapsize)
       end
-    else
+    when :max
+      @mode = :interval
+      @heapsize = mode_call(:heapify)
+    when nil
       @mode = :min
       @heapsize = mode_call(:heapify)
+    else
+      raise "[bug] unexpected mode: #{@mode.inspect}"
     end
   end
   private :use_min
 
   def use_max
-    if @mode == :max || @mode == :interval
+    case @mode
+    when :max, :interval
       if @heapsize < self.size
         @heapsize = mode_call(:heapify, @heapsize)
       end
-    else
+    when :min
+      @mode = :interval
+      @heapsize = mode_call(:heapify)
+    when nil
       @mode = :max
       @heapsize = mode_call(:heapify)
+    else
+      raise "[bug] unexpected mode: #{@mode.inspect}"
     end
   end
   private :use_max

@@ -1097,4 +1097,26 @@ class TestDepq < Test::Unit::TestCase
     assert_raise(StopIteration) { e.next }
   end
 
+  def test_mode_min_first
+    q = Depq.new
+    q.insert 1
+    q.insert 2
+    assert_equal(nil, q.instance_eval { @mode })
+    assert_equal(1, q.delete_min)
+    assert_equal(:min, q.instance_eval { @mode })
+    assert_equal(2, q.delete_max)
+    assert_equal(:interval, q.instance_eval { @mode })
+  end
+
+  def test_mode_max_first
+    q = Depq.new
+    q.insert 1
+    q.insert 2
+    assert_equal(nil, q.instance_eval { @mode })
+    assert_equal(2, q.delete_max)
+    assert_equal(:max, q.instance_eval { @mode })
+    assert_equal(1, q.delete_min)
+    assert_equal(:interval, q.instance_eval { @mode })
+  end
+
 end
