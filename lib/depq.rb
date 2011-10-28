@@ -455,12 +455,10 @@ class Depq
   end
   private :set_entry
 
-  def delete_entry(i)
-    locator, priority, subpriority = @ary[i*ARY_SLICE_SIZE, ARY_SLICE_SIZE]
-    @ary[i*ARY_SLICE_SIZE, ARY_SLICE_SIZE] = []
-    [locator, priority, subpriority]
+  def delete_last_entry
+    @ary.slice!(@ary.size-ARY_SLICE_SIZE, ARY_SLICE_SIZE)
   end
-  private :delete_entry
+  private :delete_last_entry
 
   def each_entry
     0.upto(self.size-1) {|i|
@@ -972,7 +970,7 @@ class Depq
         set_entry(index, loc2, priority2, subpriority2)
         loc2.send(:index=, index)
       end
-      delete_entry(last)
+      delete_last_entry
       loc.send(:internal_deleted, priority, subpriority)
       loc
     else
@@ -1501,7 +1499,7 @@ class Depq
     _, priority, subpriority = get_entry(i)
     last = self.size - 1
     loc.send(:internal_deleted, priority, subpriority)
-    el, pl, sl = delete_entry(last)
+    el, pl, sl = delete_last_entry
     if i != last
       set_entry(i, el, pl, sl)
       el.send(:index=, i)
@@ -1937,7 +1935,7 @@ class Depq
     _, priority, subpriority = get_entry(i)
     last = self.size - 1
     loc.send(:internal_deleted, priority, subpriority)
-    el, pl, sl = delete_entry(last)
+    el, pl, sl = delete_last_entry
     if i != last
       set_entry(i, el, pl, sl)
       el.send(:index=, i)
