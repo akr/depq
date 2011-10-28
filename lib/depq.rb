@@ -432,7 +432,6 @@ class Depq
     @heapsize = 0
     @mode = nil
     @totalcount = 0
-    #@subpriority_generator = nil
   end
 
   # :stopdoc:
@@ -542,7 +541,6 @@ class Depq
   private :check_locator
 
   def default_subpriority
-    #return @subpriority_generator.call if @subpriority_generator
     self.totalcount
   end
   private :default_subpriority
