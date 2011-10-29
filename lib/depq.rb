@@ -1481,12 +1481,13 @@ class Depq
   def mm_downheap(i, upper)
     while true
       j = i*2+1
-      k = i*2+2
+      k = j+1
       return if self.size <= j
       if self.size == k
         return if upper.call(i, j)
         swap(i, j)
         i = j
+        return
       else
         return if upper.call(i, j) && upper.call(i, k)
         loc = upper.call(j, k) ? j : k
