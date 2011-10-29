@@ -18,9 +18,9 @@ def astar(start, heuristics=nil, &find_nexts)
       find_nexts.call(v1).each {|v2, w2|
         w3 = w1 + w2 + h[v2]
         if !visited[v2]
-          visited[v2] = q.insert(path+[v2], w3)
+          visited[v2] = q.insert([path,v2], w3)
         elsif w3 < visited[v2].priority
-          visited[v2].update(path+[v2], w3)
+          visited[v2].update([path,v2], w3)
         end
       }
     end
