@@ -241,6 +241,11 @@ class Depq
       super value, subpriority, priority
     end
 
+    def initialize_in_queue(value, depq, index)
+      initialize(value, index, depq)
+    end
+    private :initialize_in_queue
+
     def inspect
       prio = self.priority
       if self.value == prio
@@ -550,7 +555,8 @@ class Depq
       k = 0
       n.times {|i|
         loc1 = @ary[k]
-        loc2 = Depq::Locator.new(loc1.value, i, self)
+        loc2 = Depq::Locator.allocate
+        loc2.send(:initialize_in_queue, loc1.value, self, i)
         @ary[k] = loc2
         k += ARY_SLICE_SIZE
       }
