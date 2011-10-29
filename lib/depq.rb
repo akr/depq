@@ -382,10 +382,8 @@ class Depq
 
     def internal_inserted(depq, index)
       raise ArgumentError, "already inserted" if in_queue?
-      priority = index_or_priority()
       self.depq_or_subpriority = depq
       self.index_or_priority = index
-      priority
     end
     private :internal_inserted
 
@@ -720,9 +718,10 @@ class Depq
   #   p q.delete_min           #=> 1
   #
   def insert_locator(loc)
+    priority = loc.priority
     subpriority = loc.subpriority || default_subpriority
     i = self.size
-    priority = loc.send(:internal_inserted, self, i)
+    loc.send(:internal_inserted, self, i)
     set_entry(i, loc, priority, subpriority)
     @totalcount += 1
     loc
