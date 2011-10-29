@@ -75,17 +75,17 @@ heuristics8 = proc {|pos|
 }
 
 t1 = Time.now
-searched = []
-path = astar(START, heuristics4, &find_nexts4).each {|path, w|
-  searched << path.last
-  if path.last == GOAL
-    break path.flatten
+searched = {}
+path = astar(START, heuristics4, &find_nexts4).each {|prev, cur, w|
+  searched[cur] = [searched[prev], cur]
+  if cur == GOAL
+    break searched[cur].flatten.compact
   end
 }
 t2 = Time.now
 p t2-t1
 
-searched.each {|pos|
+searched.each_key {|pos|
   x, y = pos.x, pos.y
   MAZE[y][x] = '.'
 }
