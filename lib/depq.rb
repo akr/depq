@@ -1659,10 +1659,10 @@ class Depq
   def itv_maxside(i) i | 1 end
   def itv_parent_minside(j) (j-2)/2 & ~1 end
   def itv_parent_maxside(j) (j-2)/2 | 1 end
-  def itv_child1_minside(i) i &= ~1; (i*2+2) & ~1 end
-  def itv_child1_maxside(i) i &= ~1; (i*2+2) | 1 end
-  def itv_child2_minside(i) i &= ~1; (i*2+4) & ~1 end
-  def itv_child2_maxside(i) i &= ~1; (i*2+4) | 1 end
+  def itv_child1_minside(i) i &= ~1; i*2+2 end
+  def itv_child1_maxside(i) i &= ~1; i*2+3 end
+  def itv_child2_minside(i) i &= ~1; i*2+4 end
+  def itv_child2_maxside(i) i &= ~1; i*2+5 end
 
   def pcmp(i, j)
     ei, pi, si = get_entry(i)
