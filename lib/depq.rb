@@ -1250,6 +1250,8 @@ class Depq
 
   # iterate over the values and priorities in the queue.
   #
+  # The iteration order is unspecified.
+  #
   #   q = Depq.new
   #   q.insert "durian", 1
   #   q.insert "banana", 3
