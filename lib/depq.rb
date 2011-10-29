@@ -1689,7 +1689,7 @@ class Depq
         imin = itv_minside(i)
         imax = itv_maxside(i)
         if range.include?(imin) && range.include?(imax)
-          if pcmp(imin, imax) == 0 && scmp(imin, imax) > 0
+          if scmp(imin, imax) > 0 && pcmp(imin, imax) == 0
             swap imin, imax
           end
         end
