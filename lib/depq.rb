@@ -1490,9 +1490,9 @@ class Depq
         return
       else
         return if upper.call(i, j) && upper.call(i, k)
-        loc = upper.call(j, k) ? j : k
-        swap(i, loc)
-        i = loc
+        m = upper.call(j, k) ? j : k
+        swap(i, m)
+        i = m
       end
     end
   end
