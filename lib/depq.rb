@@ -1024,8 +1024,7 @@ class Depq
   #
   def delete_min_priority
     loc = delete_min_locator
-    return nil unless loc
-    [loc.value, loc.priority]
+    loc and [loc.value, loc.priority]
   end
 
   # delete the minimum element in the queue and returns the value.
@@ -1089,8 +1088,7 @@ class Depq
   #
   def delete_max_priority
     loc = delete_max_locator
-    return nil unless loc
-    [loc.value, loc.priority]
+    loc and [loc.value, loc.priority]
   end
 
   # delete the maximum element in the queue and returns the value.
@@ -1152,8 +1150,7 @@ class Depq
   #
   def delete_unspecified_priority
     loc = delete_unspecified_locator
-    return nil unless loc
-    [loc.value, loc.priority]
+    loc and [loc.value, loc.priority]
   end
 
   # delete an element in the queue and returns the value.
@@ -1173,8 +1170,7 @@ class Depq
   #
   def delete_unspecified
     loc = delete_unspecified_locator
-    return nil unless loc
-    loc.value
+    loc and loc.value
   end
 
   # replaces the minimum element.
