@@ -1247,7 +1247,7 @@ class Depq
   #   }
   #
   def each_locator # :yield: locator
-    each_entry {|locator, priority|
+    each_entry {|locator,|
       yield locator
     }
     nil
