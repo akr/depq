@@ -1307,6 +1307,8 @@ class Depq
   #   p Depq.nlargest(3, [5, 2, 3, 1, 4, 6, 7]) {|e| -e } #=> [3, 2, 1]
   #
   def Depq.nlargest(n, iter)
+    raise ArgumentError, "n is negative" if n < 0
+    return [] if n == 0
     limit = (n * Math.log(1+n)).ceil
     limit = 1024 if limit < 1024
     q = Depq.new
@@ -1360,6 +1362,8 @@ class Depq
   #   p Depq.nsmallest(5, [5, 2, 3, 1, 4, 6, 7]) {|e| -e } #=> [7, 6, 5, 4, 3]
   #
   def Depq.nsmallest(n, iter)
+    raise ArgumentError, "n is negative" if n < 0
+    return [] if n == 0
     limit = (n * Math.log(1+n)).ceil
     limit = 1024 if limit < 1024
     q = Depq.new
