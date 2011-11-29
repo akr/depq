@@ -1119,4 +1119,53 @@ class TestDepq < Test::Unit::TestCase
     assert_equal(:interval, q.instance_eval { @mode })
   end
 
+  def test_astar
+    g = {
+      :A => [[:B, 7], [:E, 2]],
+      :B => [[:C, 5], [:F, 4]],
+      :C => [[:D, 1], [:G, 1]],
+      :D => [[:H, 3]],
+      :E => [[:F, 3]],
+      :F => [[:G, 3]],
+      :G => [[:H, 5]],
+      :H => []
+    }
+    res = []
+    Depq.astar_search(:A) {|n| g[n] }.each {|prev, curr, cost| res << [prev, curr, cost] }
+    assert_equal(
+      [[nil, :A, 0],
+       [:A, :E, 2],
+       [:E, :F, 5],
+       [:A, :B, 7],
+       [:F, :G, 8],
+       [:B, :C, 12],
+       [:G, :H, 13],
+       [:C, :D, 13]],
+      res)
+
+    # heuristics using Manhattan distance assuming the goal is H.
+    h = {
+      :A => 4,
+      :B => 3,
+      :C => 2,
+      :D => 1,
+      :E => 3,
+      :F => 2,
+      :G => 1,
+      :H => 0
+    }
+    res = []
+    Depq.astar_search(:A, h) {|n| g[n] }.each {|prev, curr, cost| res << [prev, curr, cost] }
+    assert_equal(
+      [[nil, :A, 0],
+       [:A, :E, 2],
+       [:E, :F, 5],
+       [:F, :G, 8],
+       [:A, :B, 7],
+       [:G, :H, 13],
+       [:B, :C, 12],
+       [:C, :D, 13]],
+      res)
+  end
+
 end
