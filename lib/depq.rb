@@ -1452,6 +1452,102 @@ class Depq
     end
   end
 
+  # search a graph using A* search algorithm.
+  #
+  # The graph is defined by _start_ argument and the given block.
+  # _start_ specifies the start node for searching.
+  # The block should takes a node and return an array of pairs.
+  # The pair is an 2-element array which contains the next node and cost of the given node to the next node.
+  #
+  # The optional argument, _heuristics_ specifies
+  # conservative estimation to goal.
+  # It should be a Hash or a Proc that _heuristics_+[node]+ returns an estimated cost to goal.
+  # The estimated cost must be smaller or equal to the true cost.
+  # If _heuristics_ is not given, Hash.new(0) is used.
+  # This means +Depq.astar_search+ behaves as Dijkstra's algorithm in that case.
+  #
+  # +Depq.astar_search+ returns an enumerator.
+  # It yields 3 values: previous node, current node and total cost between start node to current node.
+  # When current node is start node, nil is given for previous node.
+  #
+  #   #    7    5    1
+  #   #  A--->B--->C--->D
+  #   #  |    |    |    |
+  #   # 2|   4|   1|   3|
+  #   #  |    |    |    |
+  #   #  V    V    V    V
+  #   #  E--->F--->G--->H
+  #   #    3    3    5
+  #   #
+  #   g = {
+  #     :A => [[:B, 7], [:E, 2]],
+  #     :B => [[:C, 5], [:F, 4]],
+  #     :C => [[:D, 1], [:G, 1]],
+  #     :D => [[:H, 3]],
+  #     :E => [[:F, 3]],
+  #     :F => [[:G, 3]],
+  #     :G => [[:H, 5]],
+  #     :H => []
+  #   }
+  #   # This doesn't specify _heuristics_.  So This is Dijkstra's algorithm.
+  #   Depq.astar_search(:A) {|n| g[n] }.each {|prev, curr, cost| p [prev, curr, cost] }
+  #   #=> [nil, :A, 0]
+  #   #   [:A, :E, 2]
+  #   #   [:E, :F, 5]
+  #   #   [:A, :B, 7]
+  #   #   [:F, :G, 8]
+  #   #   [:B, :C, 12]
+  #   #   [:G, :H, 13]  # H found.
+  #   #   [:C, :D, 13]
+  #
+  #   # heuristics using Manhattan distance assuming the goal is H.
+  #   h = {
+  #     :A => 4,
+  #     :B => 3,
+  #     :C => 2,
+  #     :D => 1,
+  #     :E => 3,
+  #     :F => 2,
+  #     :G => 1,
+  #     :H => 0
+  #   }
+  #   # This specify _heuristics_.  So This is A* search algorithm.
+  #   Depq.astar_search(:A, h) {|n| g[n] }.each {|prev, curr, cost| p [prev, curr, cost] }
+  #   #=> [nil, :A, 0]
+  #   #   [:A, :E, 2]
+  #   #   [:E, :F, 5]
+  #   #   [:F, :G, 8]
+  #   #   [:A, :B, 7]
+  #   #   [:G, :H, 13]  # H found.  Bit better than Dijkstra's algorithm.
+  #   #   [:B, :C, 12]
+  #   #   [:C, :D, 13]
+  #
+  # cf. http://en.wikipedia.org/wiki/A*_search_algorithm
+  #
+  def Depq.astar_search(start, heuristics=nil, &find_nexts)
+    Enumerator.new {|y|
+      heuristics ||= Hash.new(0)
+      h = Hash.new {|_, k| h[k] = heuristics[k] }
+      q = Depq.new
+      visited = {start => q.insert([nil, start], h[start])}
+      until q.empty?
+        path, w1 = q.delete_min_priority
+        v1 = path.last
+        w1 -= h[v1]
+        y.yield [path.first, path.last, w1]
+        find_nexts.call(v1).each {|v2, w2|
+          w3 = w1 + w2 + h[v2]
+          if !visited[v2]
+            visited[v2] = q.insert([path.last,v2], w3)
+          elsif w3 < visited[v2].priority
+            visited[v2].update([path.last,v2], w3)
+          end
+        }
+      end
+      nil
+    }
+  end
+
   private
   # :stopdoc:
 

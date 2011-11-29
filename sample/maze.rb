@@ -3,7 +3,7 @@
 # usage:
 #   ruby -Isample -Ilib sample/maze.rb
 
-require_relative 'astar'
+require 'depq'
 
 Pos = Struct.new(:x, :y)
 
@@ -76,7 +76,7 @@ heuristics8 = proc {|pos|
 
 t1 = Time.now
 searched = {}
-path = astar(START, heuristics4, &find_nexts4).each {|prev, cur, w|
+path = Depq.astar_search(START, heuristics4, &find_nexts4).each {|prev, cur, w|
   searched[cur] = [searched[prev], cur]
   if cur == GOAL
     break searched[cur].flatten.compact
