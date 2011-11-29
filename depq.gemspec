@@ -1,10 +1,21 @@
 Gem::Specification.new do |s|
   s.name = 'depq'
-  s.version = '0.5'
-  s.date = '2011-10-27'
+  s.version = '0.6'
+  s.date = '2011-11-29'
   s.author = 'Tanaka Akira'
   s.email = 'akr@fsij.org'
-  s.files = %w[README lib/depq.rb]
+  s.files = %w[
+    README
+    lib/depq.rb
+    sample/dijkstra.rb
+    sample/exqsort.rb
+    sample/huffman.rb
+    sample/int-3d.rb
+    sample/kruskal.rb
+    sample/maze.rb
+    sample/prim.rb
+    sample/sched.rb
+  ]
   s.test_files = %w[test/test-depq.rb]
   s.has_rdoc = true
   s.homepage = 'http://depq.rubyforge.org/'
