@@ -8,7 +8,7 @@ depq is double-ended stable priority queue with priority update operation implem
 * priority - you can get a value with minimum priority
 * double-ended - you can get a value with maximum priority too
 * stable - you will get the value inserted first with minimum/maximum priority
-* priority update - usable for Dijkstra's shortest path algorithm and various graph algorithms
+* priority update - you can change the priority of inserted values (usable for Dijkstra's shortest path algorithm and various graph algorithms)
 * implicit heap - compact heap representation using array.  most operations are O(log n) at worst
 * several utility methods: nlargest, nsmallest, merge, astar_search
 
