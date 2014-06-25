@@ -299,7 +299,7 @@ class Depq
     def priority
       if in_queue?
         q = depq_or_subpriority()
-        priority, subpriority = q.send(:internal_get_priority, self)
+        priority, _subpriority = q.send(:internal_get_priority, self)
         priority
       else
         index_or_priority()
@@ -310,7 +310,7 @@ class Depq
     def subpriority
       if in_queue?
         q = depq_or_subpriority()
-        priority, subpriority = q.send(:internal_get_priority, self)
+        _priority, subpriority = q.send(:internal_get_priority, self)
         subpriority
       else
         depq_or_subpriority()
@@ -445,6 +445,26 @@ class Depq
   ARY_SLICE_SIZE = 3
   # :startdoc:
 
+  def get_entry_ps(i)
+    get_entry(i).values_at(1, 2)
+  end
+  private :get_entry_ps
+
+  def get_entry_e(i)
+    get_entry(i)[0]
+  end
+  private :get_entry_e
+
+  def get_entry_p(i)
+    get_entry(i)[1]
+  end
+  private :get_entry_p
+
+  def get_entry_s(i)
+    get_entry(i)[2]
+  end
+  private :get_entry_s
+
   def get_entry(i)
     locator = @ary[i*ARY_SLICE_SIZE+0]
     priority = @ary[i*ARY_SLICE_SIZE+1]
@@ -539,7 +559,7 @@ class Depq
 
   def check_locator(loc)
     if !self.equal?(loc.depq) ||
-       !get_entry(loc.send(:index))[0].equal?(loc)
+       !get_entry_e(loc.send(:index)).equal?(loc)
       raise ArgumentError, "unexpected locator"
     end
   end
@@ -693,7 +713,7 @@ class Depq
 
   def internal_get_priority(loc)
     check_locator(loc)
-    locator, priority, subpriority = get_entry(loc.send(:index))
+    priority, subpriority = get_entry_ps(loc.send(:index))
     [priority, subpriority]
   end
   private :internal_get_priority
@@ -972,7 +992,7 @@ class Depq
     check_locator(loc)
     index = loc.send(:index)
     if @heapsize <= index
-      _, priority, subpriority = get_entry(index)
+      priority, subpriority = get_entry_ps(index)
       last = self.size - 1
       if index != last
         loc2, priority2, subpriority2 = get_entry(last)
@@ -1132,7 +1152,7 @@ class Depq
   #
   def delete_unspecified_locator
     return nil if empty?
-    loc, _ = get_entry(self.size-1)
+    loc = get_entry_e(self.size-1)
     delete_locator(loc)
   end
 
@@ -1598,13 +1618,12 @@ class Depq
   end
 
   def mm_find_top_loc
-    loc, _ = get_entry(0)
-    loc
+    get_entry_e(0)
   end
 
   def mm_delete_loc(loc, upper)
     i = loc.send(:index)
-    _, priority, subpriority = get_entry(i)
+    priority, subpriority = get_entry_ps(i)
     last = self.size - 1
     loc.send(:internal_deleted, priority, subpriority)
     el, pl, sl = delete_last_entry
@@ -1670,8 +1689,8 @@ class Depq
   end
 
   def min_upper?(i, j)
-    ei, pi, si = get_entry(i)
-    ej, pj, sj = get_entry(j)
+    pi, si = get_entry_ps(i)
+    pj, sj = get_entry_ps(j)
     min_compare(pi, si, pj, sj) <= 0
   end
 
@@ -1714,8 +1733,8 @@ class Depq
   end
 
   def max_upper?(i, j)
-    ei, pi, si = get_entry(i)
-    ej, pj, sj = get_entry(j)
+    pi, si = get_entry_ps(i)
+    pj, sj = get_entry_ps(j)
     max_compare(pi, si, pj, sj) >= 0
   end
 
@@ -1765,14 +1784,14 @@ class Depq
   def itv_child2_maxside(i) i &= ~1; i*2+5 end
 
   def pcmp(i, j)
-    ei, pi, si = get_entry(i)
-    ej, pj, sj = get_entry(j)
+    pi = get_entry_p(i)
+    pj = get_entry_p(j)
     compare_priority(pi, pj)
   end
 
   def scmp(i, j)
-    ei, pi, si = get_entry(i)
-    ej, pj, sj = get_entry(j)
+    si = get_entry_s(i)
+    sj = get_entry_s(j)
     si <=> sj
   end
 
@@ -1845,7 +1864,7 @@ class Depq
             k = k1
           elsif pc > 0
             k = k2
-          elsif (sc = scmp(k1, k2)) <= 0
+          elsif scmp(k1, k2) <= 0
             k = k1
           else
             k = k2
@@ -1876,7 +1895,7 @@ class Depq
             k = k2
           elsif pc > 0
             k = k1
-          elsif (sc = scmp(k1, k2)) <= 0
+          elsif scmp(k1, k2) <= 0
             k = k1
           else
             k = k2
@@ -1990,7 +2009,7 @@ class Depq
 
   def itv_update_prio(loc, prio, subprio)
     i = loc.send(:index)
-    ei, pi, si = get_entry(i)
+    ei = get_entry_e(i)
     set_entry(i, ei, prio, subprio)
     range = 0...self.size
     itv_adjust(i, range)
@@ -2016,15 +2035,15 @@ class Depq
     when 0
       [nil, nil]
     when 1
-      e0, p0, s0 = get_entry(0)
+      e0 = get_entry_e(0)
       [e0, e0]
     else
       if pcmp(0, 1) == 0
-        e0, p0, s0 = get_entry(0)
+        e0 = get_entry_e(0)
         [e0, e0]
       else
-        e0, p0, s0 = get_entry(0)
-        e1, p1, s1 = get_entry(1)
+        e0 = get_entry_e(0)
+        e1 = get_entry_e(1)
         [e0, e1]
       end
     end
@@ -2040,7 +2059,7 @@ class Depq
 
   def itv_delete_loc(loc)
     i = loc.send(:index)
-    _, priority, subpriority = get_entry(i)
+    priority, subpriority = get_entry_ps(i)
     last = self.size - 1
     loc.send(:internal_deleted, priority, subpriority)
     el, pl, sl = delete_last_entry

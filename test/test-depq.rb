@@ -49,12 +49,12 @@ class Depq
   end
 
   def min_validation
-    mm_validation &method(:min_upper?)
+    mm_validation(&method(:min_upper?))
   end
   MinMode[:validation] = :min_validation
 
   def max_validation
-    mm_validation &method(:max_upper?)
+    mm_validation(&method(:max_upper?))
   end
   MaxMode[:validation] = :max_validation
 
@@ -262,7 +262,7 @@ class TestDepq < Test::Unit::TestCase
     q = Depq.new
     a = q.insert("a", 2)
     b = q.insert("b", 1)
-    c = q.insert("c", 3)
+        q.insert("c", 3)
     assert_equal(b, q.find_min_locator)
     a.update("d", 0)
     assert_equal("d", a.value)
@@ -279,11 +279,11 @@ class TestDepq < Test::Unit::TestCase
   def test_locator_update_subpriority_min
     q = Depq.new
     a = q.insert("a", 1, 0)
-    b = q.insert("b", 2, 1)
+        q.insert("b", 2, 1)
     c = q.insert("c", 1, 2)
-    d = q.insert("d", 2, 3)
-    e = q.insert("e", 1, 4)
-    f = q.insert("f", 2, 5)
+        q.insert("d", 2, 3)
+        q.insert("e", 1, 4)
+        q.insert("f", 2, 5)
     assert_equal(a, q.find_min_locator)
     a.update("A", 1, 10)
     assert_equal(c, q.find_min_locator)
@@ -299,12 +299,12 @@ class TestDepq < Test::Unit::TestCase
 
   def test_locator_update_subpriority_max
     q = Depq.new
-    a = q.insert("a", 1, 0)
+        q.insert("a", 1, 0)
     b = q.insert("b", 2, 1)
-    c = q.insert("c", 1, 2)
+        q.insert("c", 1, 2)
     d = q.insert("d", 2, 3)
-    e = q.insert("e", 1, 4)
-    f = q.insert("f", 2, 5)
+        q.insert("e", 1, 4)
+        q.insert("f", 2, 5)
     assert_equal(b, q.find_max_locator)
     b.update("B", 2, 6)
     assert_equal(d, q.find_max_locator)
@@ -320,7 +320,7 @@ class TestDepq < Test::Unit::TestCase
 
   def test_locator_update_max
     q = Depq.new
-    a = q.insert("a", 2)
+        q.insert("a", 2)
     b = q.insert("b", 1)
     c = q.insert("c", 3)
     assert_equal(c, q.find_max_locator)
@@ -628,7 +628,7 @@ class TestDepq < Test::Unit::TestCase
     q = Depq.new
     loc1 = q.insert 10
     assert_equal([loc1, loc1], q.find_minmax_locator)
-    loc2 = q.insert 10
+    q.insert 10
     assert_equal([loc1, loc1], q.find_minmax_locator)
   end
 
