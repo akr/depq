@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/akr/depq'
   s.rubyforge_project = 'depq'
   s.require_path = 'lib'
+  s.license = 'BSD-3-Clause'
   s.summary = 'Stable Double-Ended Priority Queue.'
   s.description = <<'End'
 depq is a Double-Ended Priority Queue library.
