@@ -1,12 +1,13 @@
 Gem::Specification.new do |s|
   s.name = 'depq'
-  s.version = '0.6'
-  s.date = '2011-11-29'
+  s.version = '0.7'
+  s.date = '2014-06-29'
   s.author = 'Tanaka Akira'
   s.email = 'akr@fsij.org'
   s.files = %w[
     README
     lib/depq.rb
+    sample/dhondt.rb
     sample/dijkstra.rb
     sample/exqsort.rb
     sample/huffman.rb
@@ -18,7 +19,7 @@ Gem::Specification.new do |s|
   ]
   s.test_files = %w[test/test-depq.rb]
   s.has_rdoc = true
-  s.homepage = 'http://depq.rubyforge.org/'
+  s.homepage = 'https://github.com/akr/depq'
   s.rubyforge_project = 'depq'
   s.require_path = 'lib'
   s.summary = 'Stable Double-Ended Priority Queue.'
