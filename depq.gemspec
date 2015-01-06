@@ -4,6 +4,7 @@ Gem::Specification.new do |s|
   s.date = '2014-06-29'
   s.author = 'Tanaka Akira'
   s.email = 'akr@fsij.org'
+  s.required_ruby_version = '>= 1.9.2'
   s.files = %w[
     README
     lib/depq.rb
